@@ -14,7 +14,7 @@ newline
     ;
 
 label
-    :   PATH_BEGIN ID COLON PATH_END 
+    :    ID COLON?
     ;
 
 string
@@ -69,34 +69,34 @@ set
     ;
 
 path
-    :   PATH_BEGIN (SLASH | POINT | COLON)? path_head
+    :    (SLASH | LOOK_DOWN | LOOK_UP)? path_head
     ;
 
 path_tail
-    :   PATH_END newline* block?
+    :    newline* block?
     |
     (
         (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
 
-        (   PATH_END newline* block?
-        |   PATH_END listDef? (COMMA ID listDef?)*
-        |   PATH_END procDef newline* block
-        |   (SLASH | POINT | COLON) path_tail
+        (    newline* block?
+        |    listDef? (COMMA ID listDef?)*
+        |    procDef newline* block
+        |   (SLASH | LOOK_DOWN | LOOK_UP) path_tail
         )
     )
     ;
 
 path_head
-    :   internal_var PATH_END
+    :   internal_var 
     |   VAR path_tail
     |
-    (   ID PATH_END listDef
-    |   ID PATH_END procDef newline* block
+    (   ID  listDef
+    |   ID  procDef newline* block
     |   (
         (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
 
-        (   PATH_END newline* block?
-        |   (SLASH | POINT | COLON) path_tail )
+        (    newline* block?
+        |   (SLASH | LOOK_DOWN | LOOK_UP) path_tail )
         )
     )
     ;
@@ -304,11 +304,6 @@ statement
     |   expr (INC | DEC)        
     ;
 
-div
-    :   DIV
-    |   PATH_BEGIN SLASH PATH_END
-    ;
-
 expr
     :   (path | procCall) (AS path (IN expr)?)?
     |   LPAREN expr RPAREN
@@ -319,7 +314,7 @@ expr
     |   (INC | DEC) expr
     |   expr (INC | DEC)
     |   expr POW <assoc=right> expr
-    |   expr (div | MUL | MOD) expr
+    |   expr (DIV | MUL | MOD) expr
     |   expr (PLUS | MINUS) expr
     |   expr (LT | LTEQ | GT | GTEQ ) expr
     |   expr (BITSHL | BITSHR) expr

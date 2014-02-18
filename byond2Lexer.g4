@@ -7,7 +7,6 @@ lexer grammar byond2Lexer;
 {
     private int nesting = 0;
     private int indentLevel = 0;
-    private int pathLength = 0;
     private int prevTokenType = EOF;
     
     // Support multiple tokens add
@@ -66,21 +65,6 @@ lexer grammar byond2Lexer;
         return t;
     }
 
-    void addPathElement(Token token)
-    {
-        if (pathLength == 0)
-            pendingTokens.add(new CommonToken(PATH_BEGIN, "PATH_BEGIN"));
-        ++pathLength;
-        pendingTokens.add(token);
-    }
-
-    void finishPath()
-    {
-        if (pathLength > 0)
-            pendingTokens.add(new CommonToken(PATH_END, "PATH_END"));
-        pathLength = 0;
-    }
-
     boolean isPrimitiveType(int type)
     {
         return type == INT
@@ -112,7 +96,7 @@ lexer grammar byond2Lexer;
             switch (type)
             {
                 case PICK:
-                    if (pathLength > 0)
+                    if (prevTokenType == SLASH)
                         pendingTokens.add(new CommonToken(ID, token.getText()));
                     else
                         pendingTokens.add(token);
@@ -121,7 +105,6 @@ lexer grammar byond2Lexer;
                 case SLASH:
                     if (isPrimitiveType(ahead().getType()))
                     {
-                        finishPath();
                         pendingTokens.add(new CommonToken(DIV, "/"));
                         break;
                     } else if (isPrimitiveType(prevTokenType))
@@ -129,52 +112,33 @@ lexer grammar byond2Lexer;
                         pendingTokens.add(new CommonToken(DIV, "/"));
                         break;
                     } 
-                    addPathElement(token);
+                    pendingTokens.add(token);
                     break;
 
                 case COLON:
+                case POINT:
                     if (ahead().getType() != ID
                         || isPrimitiveType(prevTokenType))
                     {
                         pendingTokens.add(token);
                     } else
                     {
-                        addPathElement(token);
+                        if (type == COLON)
+                            pendingTokens.add(new CommonToken(LOOK_DOWN, ":"));
+                        else
+                            pendingTokens.add(new CommonToken(LOOK_UP, "."));
                     } 
-                    break;
-
-                case VAR:
-                case OBJ:
-                case PROC:
-                case LIST:
-                case NULL:
-                case ID:
-                case POINT:
-                    addPathElement(token);
-                    break;
-
-                case WS:
-                    if (pathLength > 0 && prevTokenType != VAR) 
-                    {
-                        finishPath();
-                    }
                     break;
 
                 case EOF:
                     dedentAll();
 
                 default:
-                    if (pathLength > 0)
-                    {
-                        finishPath();
-                    }
-
                     pendingTokens.add(token);
                     break;
             }
 
-            if (type != WS)
-                prevTokenType = type;
+            prevTokenType = type;
         }
 
         return pendingTokens.poll();
@@ -195,7 +159,7 @@ LEADING_WS
         ;
 
 WS
-    :   [ \t]+
+    :   [ \t]+ -> skip
     ;
 
 fragment NL
@@ -393,8 +357,6 @@ PLUS : '+' ;
 MINUS : '-' ;
 MUL : '*' ;
 
-DIV :   ;
-
 SLASH : '/' ;
 
 MOD : '%' ;
@@ -424,4 +386,8 @@ INDENT : ;
 DEDENT : ;
 PATH_BEGIN : ;
 PATH_END : ;
+DIV :   ;
+LOOK_UP : ;
+LOOK_DOWN : ;
+
 

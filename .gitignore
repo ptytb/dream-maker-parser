@@ -7,5 +7,5 @@
 *.html
 byond2Parser.java
 byond2Lexer.java
-Byond2ParserBaseListener.java
-Byond2ParserListener.java
+byond2ParserBaseListener.java
+byond2ParserListener.java
