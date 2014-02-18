@@ -1,0 +1,9 @@
+*.class
+*.tokens
+*.txt
+*.swp
+*.bkp
+byond2Parser.java
+byond2Lexer.java
+Byond2ParserBaseListener.java
+Byond2ParserListener.java
