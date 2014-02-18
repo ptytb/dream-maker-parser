@@ -19,5 +19,8 @@ clean:
 test:
 	./test.sh
 
-.PHONY: test
+testf:
+	./testf.sh
+
+.PHONY: test testf
 

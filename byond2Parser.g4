@@ -69,7 +69,7 @@ set
     ;
 
 path
-    :   PATH_BEGIN SLASH? path_head
+    :   PATH_BEGIN (SLASH | POINT | COLON)? path_head
     ;
 
 path_tail
@@ -304,10 +304,6 @@ statement
     |   expr (INC | DEC)        
     ;
 
-op_ternary_alter
-    :   PATH_BEGIN COLON PATH_END
-    ;
-
 div
     :   DIV
     |   PATH_BEGIN SLASH PATH_END
@@ -333,7 +329,7 @@ expr
     |   expr (BITOR) expr
     |   expr (AND) expr
     |   expr (OR) expr
-    |   expr QMARK expr op_ternary_alter expr
+    |   expr QMARK expr COLON expr
     |   op_new
     |   stat_internal
     |   procCall

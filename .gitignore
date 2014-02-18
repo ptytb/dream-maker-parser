@@ -3,6 +3,7 @@
 *.txt
 *.swp
 *.bkp
+*.png
 byond2Parser.java
 byond2Lexer.java
 Byond2ParserBaseListener.java

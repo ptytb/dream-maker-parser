@@ -66,6 +66,28 @@ lexer grammar byond2Lexer;
         return t;
     }
 
+    void addPathElement(Token token)
+    {
+        if (pathLength == 0)
+            pendingTokens.add(new CommonToken(PATH_BEGIN, "PATH_BEGIN"));
+        ++pathLength;
+        pendingTokens.add(token);
+    }
+
+    void finishPath()
+    {
+        if (pathLength > 0)
+            pendingTokens.add(new CommonToken(PATH_END, "PATH_END"));
+        pathLength = 0;
+    }
+
+    boolean isPrimitiveType(int type)
+    {
+        return type == INT
+            || type == FLOAT
+            || type == STRING;
+    }
+
     @Override
     public Token nextToken()
     {
@@ -79,65 +101,76 @@ lexer grammar byond2Lexer;
                 token = super.nextToken();
 
             int type = token.getType();
+            
+            if (type != LEADING_WS
+                && type != IGNORE_NEWLINE
+                && token.getCharPositionInLine() == 0)
+            {
+                dedentAll();
+            }
 
             switch (type)
             {
-            case PICK:
-                if (pathLength > 0)
-                    pendingTokens.add(new CommonToken(ID, token.getText()));
-                else
-                    pendingTokens.add(token);
-                break;
-                
-            case SLASH:
-                if (ahead().getType() == INT)
-                {
+                case PICK:
                     if (pathLength > 0)
-                        pendingTokens.add(new CommonToken(PATH_END, "PATH_END"));
-                    pendingTokens.add(new CommonToken(DIV, "/"));
-                    pathLength = 0;
+                        pendingTokens.add(new CommonToken(ID, token.getText()));
+                    else
+                        pendingTokens.add(token);
                     break;
-                } else if (prevTokenType == INT)
-                {
-                    pendingTokens.add(new CommonToken(DIV, "/"));
+
+                case SLASH:
+                    if (isPrimitiveType(ahead().getType()))
+                    {
+                        finishPath();
+                        pendingTokens.add(new CommonToken(DIV, "/"));
+                        break;
+                    } else if (isPrimitiveType(prevTokenType))
+                    {
+                        pendingTokens.add(new CommonToken(DIV, "/"));
+                        break;
+                    } 
+                    addPathElement(token);
                     break;
-                }
-                // Now add SLASH as path beginning
-            case VAR:
-            case OBJ:
-            case PROC:
-            case LIST:
-            case NULL:
-            case ID:
-            case POINT:
-            case COLON:
-                if (pathLength == 0)
-                    pendingTokens.add(new CommonToken(PATH_BEGIN, "PATH_BEGIN"));
-                ++pathLength;
-                pendingTokens.add(token);
-                break;
 
-            case WS:
-                if (pathLength > 0 &&
-                    prevTokenType != VAR) /* varWS/path/ form allowed */
-                {
-                    pendingTokens.add(new CommonToken(PATH_END, "PATH_END"));
-                    pathLength = 0;
-                }
-                break;
+                case COLON:
+                    if (ahead().getType() != ID
+                        || isPrimitiveType(prevTokenType))
+                    {
+                        pendingTokens.add(token);
+                    } else
+                    {
+                        addPathElement(token);
+                    } 
+                    break;
 
-            case EOF:
-                dedentAll();
+                case VAR:
+                case OBJ:
+                case PROC:
+                case LIST:
+                case NULL:
+                case ID:
+                case POINT:
+                    addPathElement(token);
+                    break;
 
-            default:
-                if (pathLength > 0)
-                {
-                    pendingTokens.add(new CommonToken(PATH_END, "PATH_END"));
-                    pathLength = 0;
-                }
+                case WS:
+                    if (pathLength > 0 && prevTokenType != VAR) 
+                    {
+                        finishPath();
+                    }
+                    break;
 
-                pendingTokens.add(token);
-                break;
+                case EOF:
+                    dedentAll();
+
+                default:
+                    if (pathLength > 0)
+                    {
+                        finishPath();
+                    }
+
+                    pendingTokens.add(token);
+                    break;
             }
 
             if (type != WS)
@@ -160,41 +193,6 @@ LEADING_WS
             skip();
         }
         ;
-
-////////////////////////////////////////////////////////////////////////////////
-// tokens resets indent to zero PART 0
-
-LINE_BEGIN_LCURV
-    :   { getCharPositionInLine() == 0 }?
-        LCURV
-        {
-            dedentAll();
-            setType(LCURV);
-        }
-    ;
-
-LINE_BEGIN_RCURV
-    :   { getCharPositionInLine() == 0 }?
-        RCURV
-        {
-            dedentAll();
-            setType(RCURV);
-        }
-    ;
-
-LINE_BEGIN_SLASH
-    :   { getCharPositionInLine() == 0 }?
-        SLASH
-        {
-            dedentAll();
-            setType(SLASH);
-        }
-    ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
-// white
 
 WS
     :   [ \t]+
@@ -325,20 +323,6 @@ fragment DIGIT:  '0'..'9' ;
 fragment EXP :  ('E' | 'e') ('+' | '-')? INT ;
 
 fragment LETTER : [a-zA-Z] | '_' | CODE_ESC;
-
-////////////////////////////////////////////////////////////////////////////////
-// tokens resets indent to zero PART 1
-
-LINE_BEGIN_ID
-    :   { getCharPositionInLine() == 0 }?
-        ID
-        {
-            dedentAll();
-            setType(ID);
-        }
-    ;
-
-////////////////////////////////////////////////////////////////////////////////
 
 ID : LETTER (LETTER | DIGIT)* ;
 
