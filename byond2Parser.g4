@@ -56,7 +56,8 @@ block
     ;
 
 line
-    :   label+
+    :   statement
+    |   label+
     |   label* statement
         (SEMI label* statement?)*
     ;
@@ -73,16 +74,16 @@ path
     ;
 
 path_tail
-    :    newline* block?
+    :   newline* block
+    |   ID listDef? (EQ expr)? ( COMMA ID listDef? (EQ expr)? )*
     |
     (
         (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
 
-        (    newline* block?
-        |    listDef? (COMMA ID listDef?)*
+        (    newline* block
         |    procDef newline* block
-        |   (SLASH | LOOK_DOWN | LOOK_UP) path_tail
-        )
+        |   (SLASH | LOOK_DOWN | LOOK_UP) path_tail?
+        )?
     )
     ;
 
@@ -95,8 +96,8 @@ path_head
     |   (
         (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
 
-        (    newline* block?
-        |   (SLASH | LOOK_DOWN | LOOK_UP) path_tail )
+        (   newline* block
+        |   (SLASH | LOOK_DOWN | LOOK_UP) path_tail? )?
         )
     )
     ;
@@ -340,8 +341,8 @@ exprList
     ; 
 
 actualParameters
-    :   (   actualParameter
-        |   COMMA actualParameter?)+
+    :   (actualParameter | COMMA actualParameter?)
+        (COMMA actualParameter | COMMA)*
     ; 
     
 actualParameter

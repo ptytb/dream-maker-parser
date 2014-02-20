@@ -148,6 +148,22 @@ lexer grammar byond2Lexer;
 ////////////////////////////////////////////////////////////////////////////////
 // white
 
+ML_COMMENT
+    :   '/*' .* '*/' -> skip
+    ;
+
+SL_COMMENT
+    :   ('#' | '//') ~('\r' | '\n')* -> skip
+    ;
+
+fragment NL
+    :   '\r'? '\n'
+    ;
+
+JOIN_LINES
+    :   [ \t]* '\\' NL [ \t]* -> skip
+    ;
+
 LEADING_WS
     :   { getCharPositionInLine() == 0 }?
         [ \t]+
@@ -162,24 +178,12 @@ WS
     :   [ \t]+ -> skip
     ;
 
-fragment NL
-    :   '\r'? '\n'
-    ;
-
 IGNORE_NEWLINE
     :   NL
         {
             if (nesting > 0)
                 skip();
         }
-    ;
-
-ML_COMMENT
-    :   '/*' .* '*/' -> skip, channel(HIDDEN)
-    ;
-
-SL_COMMENT
-    :   ('#' | '//') ~('\r' | '\n')* -> skip, channel(HIDDEN)
     ;
 
 LPAREN    : '(' { nesting++; } ;
@@ -193,10 +197,6 @@ RBRACK    : ']' { nesting--; } ;
 LCURV     : '{' ;
 
 RCURV     : '}' ;
-
-LINE_JOIN
-    :   '\\' IGNORE_NEWLINE -> skip
-    ;
 
 ////////////////////////////////////////////////////////////////////////////////
 // keywords
