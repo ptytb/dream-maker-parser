@@ -65,13 +65,6 @@ lexer grammar byond2Lexer;
         return t;
     }
 
-    boolean isPrimitiveType(int type)
-    {
-        return type == INT
-            || type == FLOAT
-            || type == STRING;
-    }
-
     @Override
     public Token nextToken()
     {
@@ -102,32 +95,10 @@ lexer grammar byond2Lexer;
                         pendingTokens.add(token);
                     break;
 
-                case SLASH:
-                    if (isPrimitiveType(ahead().getType()))
-                    {
-                        pendingTokens.add(new CommonToken(DIV, "/"));
-                        break;
-                    } else if (isPrimitiveType(prevTokenType))
-                    {
-                        pendingTokens.add(new CommonToken(DIV, "/"));
-                        break;
-                    } 
-                    pendingTokens.add(token);
-                    break;
-
-                case COLON:
-                case POINT:
-                    if (ahead().getType() != ID
-                        || isPrimitiveType(prevTokenType))
-                    {
+                case WS:
+                    if (prevTokenType == SLASH
+                        || ahead().getType() == SLASH)
                         pendingTokens.add(token);
-                    } else
-                    {
-                        if (type == COLON)
-                            pendingTokens.add(new CommonToken(LOOK_DOWN, ":"));
-                        else
-                            pendingTokens.add(new CommonToken(LOOK_UP, "."));
-                    } 
                     break;
 
                 case EOF:
@@ -158,24 +129,25 @@ SL_COMMENT
 
 fragment NL
     :   '\r'? '\n'
+    |   '\r'
     ;
 
-JOIN_LINES
-    :   [ \t]* '\\' NL [ \t]* -> skip
+LINE_ESCAPE
+    :   '\\' NL WS? -> skip
     ;
 
 LEADING_WS
     :   { getCharPositionInLine() == 0 }?
         [ \t]+
         {
-            if (nesting == 0)   // Not in proc's arglist ( ) [ ]
+            if (nesting == 0)        // Not inside ( ) [ ]
                 emitIndent();
             skip();
         }
         ;
 
 WS
-    :   [ \t]+ -> skip
+    :   [ \t]+
     ;
 
 IGNORE_NEWLINE
@@ -286,7 +258,7 @@ fragment DIGIT:  '0'..'9' ;
 
 fragment EXP :  ('E' | 'e') ('+' | '-')? INT ;
 
-fragment LETTER : [a-zA-Z] | '_' | CODE_ESC;
+fragment LETTER : [a-zA-Z] | '_' ; //| CODE_ESC;
 
 ID : LETTER (LETTER | DIGIT)* ;
 
@@ -386,8 +358,3 @@ INDENT : ;
 DEDENT : ;
 PATH_BEGIN : ;
 PATH_END : ;
-DIV :   ;
-LOOK_UP : ;
-LOOK_DOWN : ;
-
-

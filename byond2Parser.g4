@@ -56,10 +56,8 @@ block
     ;
 
 line
-    :   statement
-    |   label+
-    |   label* statement
-        (SEMI label* statement?)*
+    :   statement (SEMI statement?)*
+    |   label
     ;
 
 set
@@ -69,8 +67,29 @@ set
         )
     ;
 
+op_deref
+    :   (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID)
+        (POINT | COLON)
+        ((CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID)
+        | op_deref)
+    ;
+
+path_expr
+    :   internal_var 
+    |   (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID) WS?
+    |   WS? (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID)
+    |   WS? (SLASH | COLON | POINT) path_expr_tail
+    ;
+
+path_expr_tail
+    :   (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID)
+        (   WS
+        |   (SLASH (WS | path_expr_tail))
+        )?
+    ;
+
 path
-    :    (SLASH | LOOK_DOWN | LOOK_UP)? path_head
+    :    WS? (SLASH | COLON | POINT)? path_head
     ;
 
 path_tail
@@ -80,10 +99,9 @@ path_tail
     (
         (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
 
-        (    newline* block
-        |    procDef newline* block
-        |   (SLASH | LOOK_DOWN | LOOK_UP) path_tail?
-        )?
+        (   newline* block
+        |   procDef newline* block
+        |   SLASH path_tail? )?
     )
     ;
 
@@ -97,7 +115,7 @@ path_head
         (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
 
         (   newline* block
-        |   (SLASH | LOOK_DOWN | LOOK_UP) path_tail? )?
+        |   SLASH path_tail? )?
         )
     )
     ;
@@ -131,9 +149,10 @@ procCall
 loop_for
     :   FOR
         LPAREN
-        (   in_expr?
+        (   in_expr
+        |   path (AS path (BITOR path)* (IN expr)? )?  
         |   statement? (SEMI | COMMA) expr? (SEMI | COMMA) statement?
-        |   expr
+        /*|   expr*/
         |   statement TO expr
         )
         RPAREN
@@ -144,6 +163,7 @@ loop_for
 callable
     :   ID
     |   path
+    |   op_deref
     ;
 
 loop_while
@@ -196,7 +216,7 @@ stat_break
     ;
 
 stat_cont
-    :   CONTINUE
+    :   CONTINUE ID?
     ;
 
 stat_spawn
@@ -208,8 +228,8 @@ stat_spawn
 
 stat_del
     :   DEL
-        (   path
-        |   LPAREN path RPAREN)
+        (   (path | op_deref)
+        |   LPAREN (path | op_deref) RPAREN)
     ;
 
 stat_switch
@@ -249,7 +269,7 @@ stat_internal
 
 op_new
     :   NEW 
-        path?
+        (path | op_deref)?
         (LPAREN actualParameters? RPAREN)?
     ;
 
@@ -306,8 +326,7 @@ statement
     ;
 
 expr
-    :   (path | procCall) (AS path (IN expr)?)?
-    |   LPAREN expr RPAREN
+    :   LPAREN expr RPAREN
     |   expr LBRACK expr? RBRACK
     |   (PLUS | MINUS) expr
     |   NOT expr
@@ -315,7 +334,7 @@ expr
     |   (INC | DEC) expr
     |   expr (INC | DEC)
     |   expr POW <assoc=right> expr
-    |   expr (DIV | MUL | MOD) expr
+    |   expr (WS? SLASH WS? | MUL | MOD) expr
     |   expr (PLUS | MINUS) expr
     |   expr (LT | LTEQ | GT | GTEQ ) expr
     |   expr (BITSHL | BITSHR) expr
@@ -334,7 +353,9 @@ expr
     |   INT
     |   FLOAT
     |   expr IN expr
-    ;  
+    |   op_deref
+    |   (path_expr | procCall) (AS path_expr (IN expr)?)?
+    ; 
 
 exprList
     :   expr (COMMA expr)*
@@ -346,7 +367,8 @@ actualParameters
     ; 
     
 actualParameter
-    :   expr
+    :   path
+    |   expr
     |   op_assign
     ;
 
