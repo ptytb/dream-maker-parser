@@ -17,8 +17,11 @@ label
     :    ID COLON?
     ;
 
-string
+constant
     :   STRING
+    |   INT
+    |   FLOAT
+    |   ID
     ;
 
 file
@@ -53,6 +56,35 @@ block_indented
 block
     :   block_braced
     |   block_indented
+    ;
+
+block_inner_switch
+    :   newline*
+        if_const
+        (   newline if_const
+        |   newline
+        )*
+        ELSE
+        newline*
+        (statement | block)?
+        newline*
+    ;
+
+block_braced_switch
+    :   LCURV
+        block_inner_switch?
+        RCURV
+    ;
+
+block_indented_switch
+    :   INDENT
+        block_inner_switch?
+        DEDENT
+    ;
+
+block_switch
+    :   block_braced_switch
+    |   block_indented_switch
     ;
 
 line
@@ -182,25 +214,28 @@ loop_do
     ;
 
 stat_goto
-    :   GOTO
-        ID
+    :   GOTO ID
+    ;
+
+if_const
+    :   IF
+        LPAREN
+        (   constant (COMMA constant)*
+        |   constant TO constant)
+        RPAREN
+    (   newline* (statement | block) )?
     ;
 
 if_cond
     :   IF
         LPAREN
-        (   exprList 
-        |   expr TO expr    // make separate ``if_range''
-        )
+        expr
         RPAREN
+        newline* (statement | block)
+        newline*
+    (   ELSE
         (   newline* statement
-        |   newline* block)
-    ;
-
-if_else
-    :   ELSE
-        (   newline* statement
-        |   newline* block)
+        |   newline* block) )?
     ;
 
 in_expr
@@ -222,8 +257,8 @@ stat_cont
 stat_spawn
     :   SPAWN
         (LPAREN expr? RPAREN)?
-        (   newline* statement
-        |   newline* block)
+        newline*
+        (statement | block)
     ;
 
 stat_del
@@ -235,8 +270,8 @@ stat_del
 stat_switch
     :   SWITCH
         LPAREN expr RPAREN
-        (   newline* statement
-        |   newline* block)
+        newline*
+        block_switch
     ;
 
 stat_call
@@ -274,7 +309,7 @@ op_new
     ;
 
 op_map_item
-    :   (STRING | INT | ID) EQ (STRING | INT | ID)
+    :   (constant | ID) EQ (constant | ID)
     ;
 
 op_assign
@@ -308,7 +343,6 @@ statement
     |   loop_do
     |   loop_while
     |   if_cond
-    |   if_else
     |   stat_switch
     |   stat_ret
     |   stat_break
@@ -349,9 +383,7 @@ expr
     |   stat_internal
     |   procCall
     |   op_map_item
-    |   string
-    |   INT
-    |   FLOAT
+    |   constant
     |   expr IN expr
     |   op_deref
     |   (path_expr | procCall) (AS path_expr (IN expr)?)?
