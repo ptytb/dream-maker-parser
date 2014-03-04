@@ -119,6 +119,10 @@ lexer grammar byond2Lexer;
 ////////////////////////////////////////////////////////////////////////////////
 // white
 
+EMPTY_LINE
+    :   { getCharPositionInLine() == 0 }? WS NL -> skip
+    ;
+
 ML_COMMENT
     :   '/*' .* '*/' -> skip
     ;
@@ -127,13 +131,13 @@ SL_COMMENT
     :   ('#' | '//') ~('\r' | '\n')* -> skip
     ;
 
+LINE_ESCAPE
+    :   '\\' NL WS? -> skip
+    ;
+
 fragment NL
     :   '\r'? '\n'
     |   '\r'
-    ;
-
-LINE_ESCAPE
-    :   '\\' NL WS? -> skip
     ;
 
 LEADING_WS
@@ -356,5 +360,3 @@ QMARK : '?' ;
 
 INDENT : ;
 DEDENT : ;
-PATH_BEGIN : ;
-PATH_END : ;

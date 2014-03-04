@@ -2,6 +2,9 @@
 [Byond](http://www.byond.com) is game engine using DreamMaker as native
 programming language.
 
+#Notes
+Running compiler requires java **-Xmx512M** command line key.
+
 #TODO
 - [ ] Make ranged **if** only inside **switch**
 - [ ] **var** cannot be path ending

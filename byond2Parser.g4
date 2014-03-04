@@ -14,14 +14,14 @@ newline
     ;
 
 label
-    :    ID COLON?
+    :   ID COLON?
+        newline* block?
     ;
 
 constant
     :   STRING
-    |   INT
-    |   FLOAT
-    |   ID
+    |   (PLUS | MINUS)? (INT | FLOAT | ID)
+    |   NULL
     ;
 
 file
@@ -64,9 +64,9 @@ block_inner_switch
         (   newline if_const
         |   newline
         )*
-        ELSE
+    (   ELSE
         newline*
-        (statement | block)?
+        (statement | block)? )?
         newline*
     ;
 
@@ -102,8 +102,7 @@ set
 op_deref
     :   (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID)
         (POINT | COLON)
-        ((CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID)
-        | op_deref)
+        ((CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID) | op_deref)
     ;
 
 path_expr
@@ -121,35 +120,33 @@ path_expr_tail
     ;
 
 path
-    :    WS? (SLASH | COLON | POINT)? path_head
-    ;
-
-path_tail
-    :   newline* block
-    |   ID listDef? (EQ expr)? ( COMMA ID listDef? (EQ expr)? )*
-    |
-    (
-        (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
-
-        (   newline* block
-        |   procDef newline* block
-        |   SLASH path_tail? )?
-    )
-    ;
-
-path_head
-    :   internal_var 
+    :   WS?
+    (   internal_var
     |   VAR path_tail
-    |
-    (   ID  listDef
-    |   ID  procDef newline* block
+    |   (SLASH | COLON | POINT)?  (
+        ID listDef
+    |   ID procDef
     |   (
         (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
 
         (   newline* block
         |   SLASH path_tail? )?
         )
+
+        )
     )
+    ;
+
+path_tail
+    :   newline* block
+    |   (
+        (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
+
+        (   newline* block
+        |   procDef 
+        |   SLASH path_tail? )?
+        )
+    |   ID listDef? (EQ expr)? ( COMMA ID listDef? (EQ expr)? )*
     ;
 
 listDef
@@ -161,6 +158,7 @@ procDef
         (   formalParameters
         |   THREE_DOTS)?
         RPAREN
+        newline* (block | statement)
         ;
 
 formalParameters
@@ -220,10 +218,12 @@ stat_goto
 if_const
     :   IF
         LPAREN
-        (   constant (COMMA constant)*
-        |   constant TO constant)
+        (   constant ((COMMA | OR) constant)*
+        |   constant TO constant
+        |   path_expr)
         RPAREN
     (   newline* (statement | block) )?
+        newline*
     ;
 
 if_cond
@@ -231,11 +231,10 @@ if_cond
         LPAREN
         expr
         RPAREN
-        newline* (statement | block)
+    (   newline* (statement | block) )?
         newline*
-    (   ELSE
-        (   newline* statement
-        |   newline* block) )?
+    (   ELSE newline* (statement | block) )?
+        newline*
     ;
 
 in_expr
@@ -278,8 +277,8 @@ stat_call
     :   CALL 
         
         LPAREN
-        (   (path)
-        |   (path COMMA path)
+        (   (path_expr | op_deref)
+        |   ((path_expr | op_deref) COMMA (path_expr | op_deref))
         |   (STRING COMMA STRING)
         )
         RPAREN
@@ -407,7 +406,7 @@ actualParameter
 internal_var
     :   var_default_ret
     |   super_ref
-    |   var_null
+    |   NULL
     ;
 
 var_default_ret
@@ -418,6 +417,3 @@ super_ref
     :   POINT POINT
     ;
 
-var_null
-    :   NULL 
-    ;
