@@ -9,3 +9,7 @@ byond2Parser.java
 byond2Lexer.java
 byond2ParserBaseListener.java
 byond2ParserListener.java
+byond2Preproc.java
+byond2PreprocLexer.java
+byond2PreprocBaseListener.java
+byond2PreprocListener.java

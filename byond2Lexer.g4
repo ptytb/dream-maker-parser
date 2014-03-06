@@ -1,4 +1,5 @@
 lexer grammar byond2Lexer;
+import byond2Common;
 
 ////////////////////////////////////////////////////////////////////////////////
 // token flow control
@@ -121,18 +122,6 @@ lexer grammar byond2Lexer;
 
 EMPTY_LINE
     :   { getCharPositionInLine() == 0 }? WS NL -> skip
-    ;
-
-ML_COMMENT
-    :   '/*' .* '*/' -> skip
-    ;
-
-SL_COMMENT
-    :   ('#' | '//') ~('\r' | '\n')* -> skip
-    ;
-
-LINE_ESCAPE
-    :   '\\' NL WS? -> skip
     ;
 
 fragment NL
@@ -262,42 +251,9 @@ fragment DIGIT:  '0'..'9' ;
 
 fragment EXP :  ('E' | 'e') ('+' | '-')? INT ;
 
-fragment LETTER : [a-zA-Z] | '_' ; //| CODE_ESC;
+fragment LETTER : [a-zA-Z] | '_' | CODE_ESC;
 
 ID : LETTER (LETTER | DIGIT)* ;
-
-fragment EVAL
-    :   '[' (EVAL | ~(']') )* ']'
-    ;
-
-fragment STRING_MULTILINE
-    :   '{"' .*? '"}'
-    ;
-
-STRING
-    :   '"' (STRING_MACRO | STRING_ESC | ~('\\'|'"') | EVAL)* '"'
-    |   '\'' (STRING_MACRO | STRING_ESC | ~('\\'|'\'') | EVAL)* '\''
-    |   STRING_MULTILINE
-    ;
-
-fragment STRING_MACRO
-    :   '\\'
-        ('the' | 'The')
-    |   ('a' | 'an' | 'A' | 'An')
-    |   ('he' | 'He' | 'she' | 'She')
-    |   ('his' | 'His')
-    |   ('hers')
-    |   ('him')
-    |   ('himself' | 'herself')
-    |   ('th')
-    |   ('s')
-    |   ('proper' | 'improper')
-    |   'ref' | 'icon'
-    |   ('red' | 'blue' )
-    |   ID
-    ;
-
-fragment STRING_ESC : '\\' (THREE_DOTS | .) ;
 
 fragment CODE_ESC
     :   '\\' . 
@@ -332,9 +288,7 @@ EQBITXOR : '^=' ;
 PLUS : '+' ;
 MINUS : '-' ;
 MUL : '*' ;
-
 SLASH : '/' ;
-
 MOD : '%' ;
 POW : '**' ;
 BITOR : '|' ;
