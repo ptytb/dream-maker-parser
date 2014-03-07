@@ -65,8 +65,7 @@ block_inner_switch
         |   newline
         )*
     (   ELSE
-        newline*
-        (statement | block)? )?
+        (newline* block | statement)? )?
         newline*
     ;
 
@@ -189,13 +188,12 @@ loop_for
         LPAREN
         (   in_expr
         |   path (AS path (BITOR path)* (IN expr)? )?  
-        |   statement? (SEMI | COMMA) expr? (SEMI | COMMA) statement?
-        /*|   expr*/
+        |   statement? SEMI expr? SEMI statement?
+        |   statement? COMMA expr? COMMA statement?
         |   statement TO expr
         )
         RPAREN
-        (   newline* statement
-        |   newline* block)
+        (newline* block | statement)
     ;
 
 callable
@@ -208,14 +206,12 @@ callable
 loop_while
     :   WHILE
         LPAREN expr RPAREN
-        (   newline* statement
-        |   newline* block)
+        (newline* block | statement)
     ;
 
 loop_do
     :   DO
-        (   newline* statement
-        |   newline* block)
+        (newline* block | statement)
         newline*
         WHILE LPAREN expr RPAREN
     ;
@@ -227,22 +223,20 @@ stat_goto
 if_const
     :   IF
         LPAREN
-        (   constant ((COMMA | OR) constant)*
+        (   constant (COMMA constant)*
+        |   constant (OR constant)*
         |   constant TO constant
         |   path_expr)
         RPAREN
-    (   newline* (statement | block) )?
+    (   newline* block | statement)?
         newline*
     ;
 
 if_cond
-    :   IF
-        LPAREN
-        expr
-        RPAREN
-    (   newline* (statement | block) )?
+    :   IF LPAREN expr RPAREN
+    (   newline* block | statement)?
         newline*
-    (   ELSE newline* (statement | block) )?
+    (   ELSE (newline* block | statement) )?
         newline*
     ;
 
@@ -265,8 +259,7 @@ stat_cont
 stat_spawn
     :   SPAWN
         (LPAREN expr? RPAREN)?
-        newline*
-        (statement | block)
+        (newline* block | statement)
     ;
 
 stat_del
@@ -276,10 +269,8 @@ stat_del
     ;
 
 stat_switch
-    :   SWITCH
-        LPAREN expr RPAREN
-        newline*
-        block_switch
+    :   SWITCH LPAREN expr RPAREN
+        newline* block_switch
     ;
 
 stat_call
