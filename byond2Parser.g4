@@ -126,6 +126,7 @@ path
     |   (SLASH | COLON | POINT)?  (
         ID listDef
     |   ID procDef
+    |   ID procDecl
     |   (
         (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
 
@@ -144,6 +145,7 @@ path_tail
 
         (   newline* block
         |   procDef 
+        |   procDecl
         |   SLASH path_tail? )?
         )
     |   ID listDef? (EQ expr)? ( COMMA ID listDef? (EQ expr)? )*
@@ -158,9 +160,15 @@ procDef
         (   formalParameters
         |   THREE_DOTS)?
         RPAREN
-        newline* (block | statement)
+        (newline* block | statement)
         ;
 
+procDecl
+    :   LPAREN
+        (   formalParameters
+        |   THREE_DOTS)?
+        RPAREN
+    ;
 formalParameters
     :   formalParameter
         (   COMMA
@@ -191,8 +199,9 @@ loop_for
     ;
 
 callable
-    :   ID
-    |   path
+    :   super_ref
+    |   ID | LIST
+    /*|   path*/
     |   op_deref
     ;
 
