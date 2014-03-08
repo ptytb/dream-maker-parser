@@ -108,46 +108,20 @@ path_expr
     :   internal_var 
     |   (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID) WS?
     |   WS? (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID)
-    |   WS? (SLASH | COLON | POINT) path_expr_tail
-    ;
-
-path_expr_tail
-    :   (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID)
-        (   WS
-        |   (SLASH (WS | path_expr_tail))
-        )?
+    |   WS? (SLASH | COLON | POINT)
+        ((CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID) SLASH?)+
+        (SLASH WS? | WS)?
     ;
 
 path
     :   WS?
     (   internal_var
-    |   VAR path_tail
-    |   (SLASH | COLON | POINT)?  (
-        ID listDef
-    |   ID procDef
-    |   ID procDecl
-    |   (
-        (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
-
-        (   newline* block
-        |   SLASH path_tail? )?
-        )
-
-        )
-    )
+    |   (SLASH | COLON | POINT)?
+        ((CALL | PICK | VAR | OBJ | PROC | LIST | ID ) SLASH?)+)
     ;
 
-path_tail
-    :   newline* block
-    |   (
-        (   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID )
-
-        (   newline* block
-        |   procDef 
-        |   procDecl
-        |   SLASH path_tail? )?
-        )
-    |   ID listDef? (EQ expr)? ( COMMA ID listDef? (EQ expr)? )*
+stat_var
+    :   VAR path listDef? (EQ expr)? ( COMMA path listDef? (EQ expr)? )*
     ;
 
 listDef
@@ -155,7 +129,8 @@ listDef
     ;
 
 procDef
-    :   LPAREN
+    :   path
+        LPAREN
         (   formalParameters
         |   THREE_DOTS)?
         RPAREN
@@ -163,7 +138,8 @@ procDef
         ;
 
 procDecl
-    :   LPAREN
+    :   path
+        LPAREN
         (   formalParameters
         |   THREE_DOTS)?
         RPAREN
@@ -176,24 +152,24 @@ formalParameters
     ; 
 
 formalParameter
-    :   path (EQ expr)? (AS path (BITOR path)* (IN expr)? )?  
+    :   path (EQ expr)? (AS path (BITOR path)*)? (IN expr)?  
     ;
 
 procCall
     :   callable LPAREN actualParameters? RPAREN
+        (AS path (BITOR path)*)? (IN expr)?  
     ;
 
 loop_for
     :   FOR
         LPAREN
-        (   in_expr
-        |   path (AS path (BITOR path)* (IN expr)? )?  
-        |   statement? SEMI expr? SEMI statement?
-        |   statement? COMMA expr? COMMA statement?
-        |   statement TO expr
-        )
+        (   (stat_var | path) (AS path (BITOR path)*)? (IN expr)? (TO expr)?
+        |   (statement | block_braced)? (SEMI | COMMA)
+            (expr | LCURV SEMI* expr? SEMI* RCURV)? (SEMI | COMMA)
+            (statement | block_braced)?
+        )?
         RPAREN
-        (newline* block | statement)
+        newline* (block | statement)
     ;
 
 callable
@@ -206,12 +182,12 @@ callable
 loop_while
     :   WHILE
         LPAREN expr RPAREN
-        (newline* block | statement)
+        newline* (block | statement)
     ;
 
 loop_do
     :   DO
-        (newline* block | statement)
+        newline* (block | statement)
         newline*
         WHILE LPAREN expr RPAREN
     ;
@@ -223,10 +199,9 @@ stat_goto
 if_const
     :   IF
         LPAREN
-        (   constant (COMMA constant)*
-        |   constant (OR constant)*
-        |   constant TO constant
-        |   path_expr)
+        (   expr (COMMA expr)*
+        |   expr (OR expr)*
+        |   expr TO expr)
         RPAREN
     (   newline* block | statement)?
         newline*
@@ -236,12 +211,8 @@ if_cond
     :   IF LPAREN expr RPAREN
     (   newline* block | statement)?
         newline*
-    (   ELSE (newline* block | statement) )?
+    (   ELSE (newline* block | statement)? )?
         newline*
-    ;
-
-in_expr
-    :   path IN expr
     ;
 
 stat_ret
@@ -259,7 +230,7 @@ stat_cont
 stat_spawn
     :   SPAWN
         (LPAREN expr? RPAREN)?
-        (newline* block | statement)
+        newline* (block | statement)
     ;
 
 stat_del
@@ -335,6 +306,9 @@ op_op_assign
 
 statement
     :   path (AS path (IN expr)?)?
+    |   procDef
+    |   procDecl
+    |   stat_var
     |   stat_internal
     |   set
     |   stat_del
@@ -356,6 +330,7 @@ statement
     |   expr BITSHL expr
     |   (INC | DEC) expr
     |   expr (INC | DEC)        
+    |   path newline* block
     ;
 
 expr
@@ -383,9 +358,9 @@ expr
     |   procCall
     |   op_map_item
     |   constant
-    |   expr IN expr
+    |   expr IN expr (TO expr)?
     |   op_deref
-    |   (path_expr | procCall) (AS path_expr (IN expr)?)?
+    |   path_expr
     ; 
 
 exprList

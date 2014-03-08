@@ -5,7 +5,7 @@ import byond2Common;
 // white
 
 ML_COMMENT
-    :   '/*' .*? '*/' -> skip
+    :   '/*' (ML_COMMENT | .)*? '*/' -> skip
     ;
 
 SL_COMMENT
