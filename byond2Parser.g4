@@ -157,7 +157,8 @@ formalParameter
 
 procCall
     :   callable LPAREN actualParameters? RPAREN
-        (AS path (BITOR path)*)? (IN expr)?  
+    (   (IN expr)? (AS path (BITOR path)*)?
+    |   (AS path (BITOR path)*)? (IN expr)? )
     ;
 
 loop_for
@@ -174,8 +175,8 @@ loop_for
 
 callable
     :   super_ref
+    |   var_default_ret
     |   ID | LIST
-    /*|   path*/
     |   op_deref
     ;
 
@@ -199,7 +200,7 @@ stat_goto
 if_const
     :   IF
         LPAREN
-        (   expr (COMMA expr)*
+        (   expr (COMMA expr)* COMMA?
         |   expr (OR expr)*
         |   expr TO expr)
         RPAREN
@@ -220,7 +221,7 @@ stat_ret
     ;
 
 stat_break
-    :   BREAK
+    :   BREAK ID?
     ;
 
 stat_cont
