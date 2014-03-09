@@ -331,6 +331,7 @@ statement
     |   expr BITSHL expr
     |   (INC | DEC) expr
     |   expr (INC | DEC)        
+    |   expr QMARK expr COLON expr
     |   path newline* block
     ;
 
