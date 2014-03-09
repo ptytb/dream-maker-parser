@@ -263,8 +263,7 @@ stat_call
 stat_pick
     :   PICK 
         LPAREN
-        (expr SEMI)? expr
-        (COMMA (expr SEMI)? expr)*
+        (expr (SEMI* expr SEMI*)? COMMA?)* 
         RPAREN
     ;
 
