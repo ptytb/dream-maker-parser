@@ -98,26 +98,25 @@ set
         )
     ;
 
+path_elem
+    :   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | STEP | ID
+    ;
+
 op_deref
-    :   (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID)
-        (POINT | COLON)
-        ((CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID) | op_deref)
+    :   path_elem (POINT | COLON) (path_elem | op_deref)
     ;
 
 path_expr
     :   internal_var 
-    |   (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID) WS?
-    |   WS? (CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID)
-    |   WS? (SLASH | COLON | POINT)
-        ((CALL | PICK | VAR | OBJ | PROC | NEW | LIST | ID) SLASH?)+
-        (SLASH WS? | WS)?
+    |   WS? path_elem WS?
+    |   WS? (SLASH | COLON | POINT) (path_elem SLASH?)+ WS?
     ;
 
 path
     :   WS?
     (   internal_var
-    |   (SLASH | COLON | POINT)?
-        ((CALL | PICK | VAR | OBJ | PROC | LIST | ID ) SLASH?)+)
+    |   (SLASH | COLON | POINT)? (path_elem SLASH?)+ WS?
+    ) 
     ;
 
 stat_var
@@ -132,16 +131,16 @@ procDef
     :   path
         LPAREN
         (   formalParameters
-        |   THREE_DOTS)?
+        |   POINT POINT POINT)?
         RPAREN
         (newline* block | statement)
-        ;
+    ;
 
 procDecl
     :   path
         LPAREN
         (   formalParameters
-        |   THREE_DOTS)?
+        |   POINT POINT POINT)?
         RPAREN
     ;
 formalParameters
@@ -152,7 +151,7 @@ formalParameters
     ; 
 
 formalParameter
-    :   path (EQ expr)? (AS path (BITOR path)*)? (IN expr)?  
+    :   path listDef? (EQ expr)? (AS path (BITOR path)*)? (IN expr)?  
     ;
 
 procCall
@@ -164,10 +163,15 @@ procCall
 loop_for
     :   FOR
         LPAREN
-        (   (stat_var | path) (AS path (BITOR path)*)? (IN expr)? (TO expr)?
-        |   (statement | block_braced)? (SEMI | COMMA)
-            (expr | LCURV SEMI* expr? SEMI* RCURV)? (SEMI | COMMA)
+        (   (stat_var | expr) (AS path (BITOR path)*)? (IN expr)? (TO expr)?
+            (STEP expr)?
+        |   (statement | block_braced)?
+            (SEMI | COMMA)
+            (expr | LCURV SEMI* expr? SEMI* RCURV)?
+            (
+            (SEMI | COMMA)
             (statement | block_braced)?
+            )?
         )?
         RPAREN
         newline* (block | statement)
@@ -176,7 +180,7 @@ loop_for
 callable
     :   super_ref
     |   var_default_ret
-    |   ID | LIST
+    |   ID | LIST | STEP
     |   op_deref
     ;
 
@@ -235,9 +239,7 @@ stat_spawn
     ;
 
 stat_del
-    :   DEL
-        (   (path | op_deref)
-        |   LPAREN (path | op_deref) RPAREN)
+    :   DEL expr
     ;
 
 stat_switch
@@ -247,16 +249,11 @@ stat_switch
 
 stat_call
     :   CALL 
-        
         LPAREN
-        (   (path_expr | op_deref)
-        |   ((path_expr | op_deref) COMMA (path_expr | op_deref))
-        |   (STRING COMMA STRING)
-        )
+        (expr (COMMA expr?)?)?
         RPAREN
-        
         LPAREN
-        actualParameters
+        actualParameters?
         RPAREN
     ;
 

@@ -55,6 +55,8 @@ MACRO_INCLUDE : 'include' ;
 
 MACRO_IFDEF : 'ifdef' ;
 
+MACRO_IFNDEF : 'ifndef' ;
+
 MACRO_IF : 'if' ;
 
 MACRO_ELIF : 'elif'   ;
@@ -64,6 +66,8 @@ MACRO_ELSE : 'else'   ;
 MACRO_ENDIF : 'endif' ;
 
 MACRO_ERROR : 'error' ;
+
+MACRO_WARN : 'warn' ;
 
 MACRO_DEFINED : 'defined' ;
 

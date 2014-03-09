@@ -13,11 +13,13 @@ macro
     |   macro_include_lib
     |   macro_include_rel
     |   macro_ifdef
+    |   macro_ifndef
     |   macro_elif
     |   macro_else
     |   macro_endif
     |   macro_if
     |   macro_error
+    |   macro_warn
     )   (NL | EOF)
     ;
 
@@ -45,6 +47,10 @@ macro_ifdef
     :   MACRO_IFDEF macro_expr
     ;
 
+macro_ifndef
+    :   MACRO_IFNDEF macro_expr
+    ;
+
 macro_elif
     :   MACRO_ELIF macro_expr
     ;
@@ -63,6 +69,10 @@ macro_if
 
 macro_error
     :   MACRO_ERROR (~NL)*
+    ;
+
+macro_warn
+    :   MACRO_WARN (~NL)*
     ;
 
 macro_expr

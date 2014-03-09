@@ -20,6 +20,7 @@ import byond2Common;
 
     private void indent(int n)
     {
+        indentLevel += n;
         while (n > 0)
         {
             pendingTokens.add(new CommonToken(INDENT, "INDENT"));
@@ -29,6 +30,7 @@ import byond2Common;
     
     private void dedent(int n)
     {
+        indentLevel -= n;
         while (n > 0)
         {
             pendingTokens.add(new CommonToken(DEDENT, "DEDENT"));
@@ -40,7 +42,6 @@ import byond2Common;
     private void dedentAll()
     {
         dedent(indentLevel);
-        indentLevel = 0;
     }
 
     private void emitIndent()
@@ -55,8 +56,6 @@ import byond2Common;
         {
             dedent(indentLevel - indent);
         }
-
-        indentLevel = indent;
     }
 
     private Token ahead()
@@ -82,7 +81,8 @@ import byond2Common;
             
             if (type != LEADING_WS
                 && type != IGNORE_NEWLINE
-                && token.getCharPositionInLine() == 0)
+                && token.getCharPositionInLine() == 0
+                && nesting == 0)
             {
                 dedentAll();
             }
@@ -137,7 +137,7 @@ LEADING_WS
                 emitIndent();
             skip();
         }
-        ;
+    ;
 
 WS
     :   [ \t]+
@@ -200,6 +200,8 @@ IN  :   'in'    ;
 
 AS  :   'as'    ;
 
+STEP : 'step' ;
+
 NULL : 'null' ;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -261,8 +263,6 @@ fragment CODE_ESC
             setText("" + getText().charAt(1));
         }
     ;
-
-THREE_DOTS  :   '...'   ;
 
 POINT : '.' ;
 
