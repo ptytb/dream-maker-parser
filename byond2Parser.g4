@@ -99,7 +99,7 @@ set
     ;
 
 path_elem
-    :   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | STEP | ID
+    :   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | STEP | ID | POINT+
     ;
 
 op_deref
@@ -109,13 +109,14 @@ op_deref
 path_expr
     :   internal_var 
     |   WS? path_elem WS?
-    |   WS? (SLASH | COLON | POINT) (path_elem SLASH?)+ WS?
+    |   WS? (SLASH | COLON | POINT) path_elem (SLASH path_elem)* SLASH? WS?
     ;
 
 path
     :   WS?
     (   internal_var
-    |   (SLASH | COLON | POINT)? (path_elem SLASH?)+ WS?
+    |   (SLASH | COLON | POINT)? path_elem (SLASH path_elem)* SLASH? WS?
+    |   (SLASH | COLON | POINT) WS?
     ) 
     ;
 

@@ -1,13 +1,16 @@
 lexer grammar byond2Common;
 
+////////////////////////////////////////////////////////////////////////////////
+// string
+
 STRING
-    :   '"' (STRING_MACRO | EVAL | ~('\\'|'"'))*? '"'
-    |   '\'' (STRING_MACRO | EVAL | ~('\\'|'"'))*? '\''
+    :   '"' (STRING_MACRO | EVAL | ~('\\'| '\r' | '\n'))*? '"'
+    |   '\'' (STRING_MACRO | EVAL | ~('\\'| '\r' | '\n'))*? '\''
     |   STRING_MULTILINE
     ;
 
 fragment EVAL
-    :   '[' (EVAL | ~(']'))*? ']'
+    :   '[' (EVAL | ~(']' | '\r' | '\n'))*? ']'
     ;
 
 fragment STRING_MULTILINE

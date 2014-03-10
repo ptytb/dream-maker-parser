@@ -2,7 +2,7 @@
 
 #cat "/media/usb3/byond-port/test.pre" |\
 java -Xmx512M -cp .:/media/usb3/media/download/antlr-4.2-complete.jar Main \
-"/media/usb3/Baystation12/Baystation12/code/game/machinery/computer/medical.dm"
+"/media/usb3/Baystation12/Baystation12/code/game/machinery/computer/security.dm"
 #"/media/usb3/Baystation12/Baystation12/code/modules/awaymissions/maploader/reader.dm"
 #"/media/usb3/Baystation12/Baystation12/code/modules/awaymissions/maploader/reader.dm"
 #"/media/usb3/Baystation12/Baystation12/code/modules/reagents/Chemistry-Reagents.dm"

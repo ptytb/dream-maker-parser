@@ -1,20 +1,5 @@
 lexer grammar byond2PreprocLexer;
-import byond2Common;
-
-////////////////////////////////////////////////////////////////////////////////
-// white
-
-ML_COMMENT
-    :   '/*' (ML_COMMENT | .)*? '*/' -> skip
-    ;
-
-SL_COMMENT
-    :   '//' ~('\r' | '\n')* -> skip
-    ;
-
-LINE_ESCAPE
-    :   '\\' ('\r'? '\n' | '\r') WS? -> skip
-    ;
+import byond2WhiteSpace, byond2Common;
 
 ////////////////////////////////////////////////////////////////////////////////
 // plain mode

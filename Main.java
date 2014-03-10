@@ -23,7 +23,7 @@ class Main
 
         //parser.setBuildParseTree(true);
         RuleContext tree = parser.file();
-        //tree.inspect(parser); // show in gui
+        tree.inspect(parser); // show in gui
         //tree.save(parser, "/tmp/R.ps"); // Generate postscript
         //System.out.println(tree.toStringTree(parser));
     }
