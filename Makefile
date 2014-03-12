@@ -29,7 +29,7 @@ all: $(classes) $(CLS)
 	javac -cp .:/media/usb3/media/download/antlr-4.2-complete.jar $<
 
 %.java: %.g4
-	java -jar /media/usb3/media/download/antlr-4.2-complete.jar $?
+	java -jar /media/usb3/media/download/antlr-4.2-complete.jar -visitor $?
 
 clean:
 	-rm byond2Parser.java

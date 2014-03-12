@@ -4,25 +4,59 @@ import java.util.*;
 
 class Preprocessor implements Runnable
 {
+    // Output text stream
     public PipedWriter pipe = new PipedWriter();
-    private byond2PreprocLexer lexer;
-    private Vector<Token> macro = new Vector<Token>();
-    private IncludeStream is;
 
-    Preprocessor(IncludeStream input) throws IOException
+    private IncludeStream is;
+    private byond2PreprocLexer lexer;
+    private Stack<byond2PreprocLexer> lexers = new Stack<byond2PreprocLexer>();
+
+    // Current macro
+    private Vector<Token> macro = new Vector<Token>();
+
+    Preprocessor(IncludeStream is) throws IOException
     {
-        is = input;
-        lexer = new byond2PreprocLexer(new ANTLRInputStream(input));
+        this.is = is;
+        lexer = lexerFactory();
     }
 
     public void run()
     {
         try
         {
-            while (consumeNextToken())
+            while (consume())
                 ;
             pipe.close();
         } catch (IOException e) { }
+    }
+
+    private byond2PreprocLexer lexerFactory()
+    {
+        byond2PreprocLexer lexer = new byond2PreprocLexer(
+                new UnbufferedCharStream(is));
+        lexer.setTokenFactory(new CommonTokenFactory(true));
+        return lexer;
+    }
+
+    private void include(String name)
+    {
+        try
+        {
+            is.include(name); // In this context current file can be vacuumed
+            lexers.push(lexer);
+            lexer = lexerFactory();
+        }
+        catch (IOException e) { }
+    }
+
+    private void evalMacro(RuleContext tree)
+    {
+        MacroEval e = new MacroEval();
+        String name = e.eval(tree);
+        if (name != null)
+        {
+            include(name);
+        }
     }
 
     private void flushMacro()
@@ -33,14 +67,23 @@ class Preprocessor implements Runnable
         RuleContext tree = parser.macro();
         //tree.inspect(parser); // show in gui 
         //System.out.println(tree.toStringTree(parser));
+        evalMacro(tree);
         macro.clear();
     }
 
-    private boolean consumeNextToken() throws IOException
+    private boolean consume() throws IOException
     {
         Token token = lexer.nextToken();
+        int type = token.getType();
 
-        switch (token.getType())
+        while (type == Token.EOF && !lexers.empty())
+        {
+            lexer = lexers.pop();
+            token = lexer.nextToken();
+            type = token.getType(); 
+        }
+
+        switch (type)
         {
             //case byond2PreprocLexer.ID:
             //token = new CommonToken(token.getType(),
@@ -58,10 +101,12 @@ class Preprocessor implements Runnable
                 {
                     if (!macro.isEmpty())
                         flushMacro();
-                    pipe.write(token.getText());
+                    else
+                        pipe.write(token.getText());
+                    token = null;
                 }
         }
 
-        return token.getType() != Token.EOF;
+        return type != Token.EOF;
     }
 }

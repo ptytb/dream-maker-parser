@@ -42,15 +42,14 @@ block_inner
     ;
 
 block_braced
-    :   LCURV
-        block_inner?
-        RCURV
+    :   LCURV line?  RCURV
+    |   LCURV line? newline+
+        (INDENT block_inner?)?
+        (DEDENT newline* RCURV | RCURV (newline+ DEDENT)?)
     ;
 
 block_indented
-    :   INDENT
-        block_inner?
-        DEDENT
+    :   INDENT block_inner?  DEDENT
     ;
 
 block

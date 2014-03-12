@@ -58,9 +58,9 @@ public class IncludeStream extends InputStream
 
     public void include(String name) throws IOException
     {
+        FileState tryFs = new FileState(name);
         files.push(file);
-        FileState fs = new FileState(name);
-        file = fs;
+        file = tryFs;
     }
 
     @Override
@@ -68,12 +68,11 @@ public class IncludeStream extends InputStream
     {
         int b = file.fs.read();
 
-        if (b == -1)
-            if (!files.empty())
-            {
-                file = files.pop();
-                file.reopen();
-            }
+        if (b == -1 && !files.empty())
+        {
+            file = files.pop();
+            file.reopen();
+        }
 
         return b;
     }
