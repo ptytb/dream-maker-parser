@@ -5,7 +5,6 @@ class FileState
 {
     FileState(String name) throws FileNotFoundException
     {
-        this.name = name;
         file = new File(name);
         fs = new FileInputStream(file);
         offset = 0;
@@ -35,7 +34,6 @@ class FileState
         }
     }
 
-    String name;
     File file;
     InputStream fs;
     long offset;

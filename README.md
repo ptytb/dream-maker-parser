@@ -3,15 +3,12 @@
 programming language.
 
 #Notes
-Running compiler requires java **-Xmx512M** command line key.
+##Building AST
+Running parser requires java **-Xmx512M** command line key.
 
 #TODO
-- [ ] Make ranged **if** only inside **switch**
-- [ ] **var** cannot be path ending
-- [ ] make speical block for **proc** definitions, with labels instead of nested
-  paths
-- [ ] add **as in** form into **expr**
-- [ ] valid **{}** blocks are only:
-    * *line* { line ; line ; ... } *NL*
-    * *line* { NL **indent** line ; ... } *NL*
-
+- make separate block for **proc** definitions, with labels instead of nested
+  procs;
+- fix **{}** blocks;
+- complete preprocessor;
+- **var** cannot be path ending

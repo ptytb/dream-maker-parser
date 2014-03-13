@@ -8,7 +8,8 @@ IGNORE = \
 	 byond2Preproc.java\
 	 byond2PreprocLexer.java\
 	 byond2PreprocBaseListener.java\
-	 byond2PreprocListener.java
+	 byond2PreprocListener.java\
+	 byond2MacroEval.java
 
 grammars = \
 	   byond2Lexer.g4\

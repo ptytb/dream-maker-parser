@@ -15,6 +15,7 @@ class Main
             is = new IncludeStream(System.in);
 
         Preprocessor preproc = new Preprocessor(is);
+        preproc.addSearchPath("/media/usb3/Baystation12/Baystation12");
         PipedReader pipe = new PipedReader(preproc.pipe);
         Thread t = new Thread(preproc, "Preprocessor");
         t.start();

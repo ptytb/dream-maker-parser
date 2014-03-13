@@ -13,3 +13,9 @@ byond2Preproc.java
 byond2PreprocLexer.java
 byond2PreprocBaseListener.java
 byond2PreprocListener.java
+output.dm
+byond2ParserBaseVisitor.java
+byond2ParserVisitor.java
+byond2PreprocBaseVisitor.java
+byond2PreprocVisitor.java
+
