@@ -4,7 +4,9 @@ import byond2WhiteSpace, byond2Common;
 ////////////////////////////////////////////////////////////////////////////////
 // plain mode
 
-MACRO : '#' { pushMode(Macro); skip(); } ;
+MACRO
+    : '#' { pushMode(Macro); skip(); }
+    ;
 
 ID
     :   LETTER (LETTER | DIGIT)*
@@ -105,7 +107,7 @@ MACRO_ID
     ;
 
 QUOTE
-    :   '"' ~('"' | '\r' | '\n')* '"'
+    :   '"' ~('\r' | '\n')*? '"'
     ;
 
 MACRO_ANY

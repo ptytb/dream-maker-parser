@@ -5,14 +5,14 @@ class Main
 {
     public static void main(String[] args) throws Exception
     {
-        IncludeStream is;
+        InputStream is;
 
         boolean optionPreprocessOnly = true;
 
         if (args.length > 0)
-            is = new IncludeStream(args[0]);
+            is = new FileInputStream(args[0]);
         else
-            is = new IncludeStream(System.in);
+            is = System.in;
 
         Preprocessor preproc = new Preprocessor(is);
         preproc.addSearchPath("/media/usb3/Baystation12/Baystation12");

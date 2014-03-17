@@ -45,10 +45,10 @@ clean:
 	-rm *.tokens
 
 test:
-	./test.sh
+	@./test.sh
 
 testf:
-	./testf.sh
+	@./testf.sh
 
 .PHONY: test testf all
 .SECONDARY:

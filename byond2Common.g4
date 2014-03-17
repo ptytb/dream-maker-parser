@@ -5,7 +5,7 @@ lexer grammar byond2Common;
 
 STRING
     :   '"' (STRING_MACRO | EVAL | ~('\\'| '\r' | '\n'))*? '"'
-    |   '\'' (STRING_MACRO | EVAL | ~('\\'| '\r' | '\n'))*? '\''
+    |   '\'' ~('\r' | '\n')*? '\''
     |   STRING_MULTILINE
     ;
 

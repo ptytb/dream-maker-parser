@@ -6,8 +6,7 @@ options
 }
 
 macro
-    :   (
-        macro_define_par
+    :   macro_define_par
     |   macro_define
     |   macro_undef
     |   macro_include_lib
@@ -20,7 +19,6 @@ macro
     |   macro_if
     |   macro_error
     |   macro_warn
-    )   (NL | EOF)
     ;
 
 macro_define_par

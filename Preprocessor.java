@@ -2,31 +2,84 @@ import org.antlr.v4.runtime.*;
 import java.io.*;
 import java.util.*;
 
+class FileState
+{
+    FileState(String name) throws FileNotFoundException
+    {
+        file = new File(name);
+        fs = new FileInputStream(file);
+        offset = 0;
+        lexer = lexerFactory();
+        this.name = name;
+    }
+
+    FileState(InputStream fs)
+    {
+        this.fs = fs;
+        offset = 0;
+        lexer = lexerFactory();
+    }
+
+    // Each lexer store state for every included file
+    private byond2PreprocLexer lexerFactory()
+    {
+        byond2PreprocLexer lexer = new byond2PreprocLexer(
+                new UnbufferedCharStream(fs));
+        lexer.setTokenFactory(new CommonTokenFactory(true));
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(errorListener);
+        return lexer;
+    }
+
+    void close() throws IOException
+    {
+        if (fs != System.in)
+        {
+            fs.close();
+            fs = null;
+        }
+    }
+
+    void reopen() throws FileNotFoundException, IOException
+    {
+        if (fs == null)
+        {
+            fs = new FileInputStream(file);
+            fs.skip(offset);
+        }
+    }
+
+    File file;
+    InputStream fs;
+    long offset;
+    byond2PreprocLexer lexer;
+    String name;
+    static BaseErrorListener errorListener;
+}
+
 class Preprocessor implements Runnable
 {
     // Output text stream
     public PipedWriter pipe = new PipedWriter();
 
-    private IncludeStream is;
-    private byond2PreprocLexer lexer;
-    private Stack<byond2PreprocLexer> lexers = new Stack<byond2PreprocLexer>();
+    private FileState file;
+    private Stack<FileState> files = new Stack<FileState>();
 
     // Current macro
     private Vector<Token> macro = new Vector<Token>();
     
-    private Vector<String> paths = new Vector<String>();
-
     private byond2ErrorListener.FileNameBinding fileNameBinding =
         new byond2ErrorListener.FileNameBinding();
-    private Stack<String> fileNames = new Stack<String>();
+
+    private Vector<String> paths = new Vector<String>();
 
     private BaseErrorListener errorListener = new byond2ErrorListener(
             fileNameBinding);
 
-    Preprocessor(IncludeStream is) throws IOException
+    Preprocessor(InputStream is) throws IOException
     {
-        this.is = is;
-        lexer = lexerFactory();
+        FileState.errorListener = errorListener;
+        file = new FileState(is);
     }
 
     public void run()
@@ -38,17 +91,6 @@ class Preprocessor implements Runnable
             pipe.close();
         }
         catch (IOException e) { }
-    }
-
-    // Each lexer store state for every included file
-    private byond2PreprocLexer lexerFactory()
-    {
-        byond2PreprocLexer lexer = new byond2PreprocLexer(
-                new UnbufferedCharStream(is));
-        lexer.setTokenFactory(new CommonTokenFactory(true));
-        lexer.removeErrorListeners();
-        lexer.addErrorListener(errorListener);
-        return lexer;
     }
 
     public void addSearchPath(String path)
@@ -77,10 +119,10 @@ class Preprocessor implements Runnable
         try
         {
             String longName = search(name);
-            is.include(longName); // In this context current file can be vacuumed
-            lexers.push(lexer);
-            lexer = lexerFactory();
-            fileNames.push(fileNameBinding.fileName);
+            FileState tryFile = new FileState(longName);
+            files.push(file);
+            file = tryFile;
+            //System.err.println("PUSH " + fileNameBinding.fileName + " CUR " + longName);
             fileNameBinding.fileName = longName;
         }
         catch (IOException e) { }
@@ -88,7 +130,7 @@ class Preprocessor implements Runnable
 
     private void evalMacro(RuleContext tree)
     {
-        MacroEval e = new MacroEval();
+        byond2MacroEval e = new byond2MacroEval();
         String name = e.eval(tree);
         if (name != null)
         {
@@ -98,6 +140,9 @@ class Preprocessor implements Runnable
 
     private void flushMacro()
     {
+        if (file.lexer._mode == file.lexer.Macro)
+            file.lexer._mode = file.lexer.DEFAULT_MODE;
+
         ListTokenSource macroStream = new ListTokenSource(macro);
         CommonTokenStream macroTokens = new CommonTokenStream(macroStream);
         byond2Preproc parser = new byond2Preproc(macroTokens);
@@ -112,7 +157,7 @@ class Preprocessor implements Runnable
 
     private boolean consume() throws IOException
     {
-        Token token = lexer.nextToken();
+        Token token = file.lexer.nextToken();
         int type = token.getType();
 
         switch (type)
@@ -125,17 +170,20 @@ class Preprocessor implements Runnable
                 if (!macro.isEmpty())
                     flushMacro();
 
-                if (!lexers.empty())
+                if (!files.empty())
                 {
-                    lexer = lexers.pop();
-                    fileNameBinding.fileName = fileNames.pop();
+                    file = files.pop();
+                    fileNameBinding.fileName = file.name;
+                    //System.err.println("POP " + fileNameBinding.fileName);
                     return true;
                 }
                 break;
 
             default:
-                if (lexer._mode == lexer.Macro)
+                if (file.lexer._mode == file.lexer.Macro)
+                {
                     macro.add(token);
+                }
                 else
                 {
                     if (!macro.isEmpty()) // type=NL might be catched
