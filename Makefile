@@ -50,6 +50,9 @@ test:
 testf:
 	@./testf.sh
 
+test_output:
+	@./testf.sh output.dm
+
 .PHONY: test testf all
 .SECONDARY:
 

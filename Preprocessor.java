@@ -175,6 +175,7 @@ class Preprocessor implements Runnable
                     file = files.pop();
                     fileNameBinding.fileName = file.name;
                     //System.err.println("POP " + fileNameBinding.fileName);
+                    pipe.write("\n");
                     return true;
                 }
                 break;
