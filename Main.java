@@ -7,7 +7,7 @@ class Main
     {
         InputStream is;
 
-        boolean optionPreprocessOnly = true;
+        boolean optionPreprocessOnly = false;
 
         if (args.length > 0)
             is = new FileInputStream(args[0]);

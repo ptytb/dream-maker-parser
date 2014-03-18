@@ -5,6 +5,7 @@
 *.bkp
 *.png
 *.html
+*.dm
 byond2Parser.java
 byond2Lexer.java
 byond2ParserBaseListener.java
