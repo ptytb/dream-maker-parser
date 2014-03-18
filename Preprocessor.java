@@ -128,10 +128,10 @@ class Preprocessor implements Runnable
         catch (IOException e) { }
     }
 
-    private void evalMacro(RuleContext tree)
+    private void evalMacro()
     {
         byond2MacroEval e = new byond2MacroEval();
-        String name = e.eval(tree);
+        String name = e.eval(macro);
         if (name != null)
         {
             include(name);
@@ -140,18 +140,7 @@ class Preprocessor implements Runnable
 
     private void flushMacro()
     {
-        if (file.lexer._mode == file.lexer.Macro)
-            file.lexer._mode = file.lexer.DEFAULT_MODE;
-
-        ListTokenSource macroStream = new ListTokenSource(macro);
-        CommonTokenStream macroTokens = new CommonTokenStream(macroStream);
-        byond2Preproc parser = new byond2Preproc(macroTokens);
-        parser.removeErrorListeners();
-        parser.addErrorListener(errorListener);
-        RuleContext tree = parser.macro();
-        //tree.inspect(parser); // show in gui 
-        //System.out.println(tree.toStringTree(parser));
-        evalMacro(tree);
+        evalMacro();
         macro.clear();
     }
 
@@ -168,7 +157,10 @@ class Preprocessor implements Runnable
 
             case Token.EOF:
                 if (!macro.isEmpty())
+                {
+                    file.lexer.popMode();
                     flushMacro();
+                }
 
                 if (!files.empty())
                 {
@@ -187,10 +179,15 @@ class Preprocessor implements Runnable
                 }
                 else
                 {
-                    if (!macro.isEmpty()) // type=NL might be catched
+                    if (!macro.isEmpty())
+                    {
+                        // popMode() called by Lexer in NL handler
                         flushMacro();
+                    }
                     else
+                    {
                         pipe.write(token.getText());
+                    }
                 }
         }
 

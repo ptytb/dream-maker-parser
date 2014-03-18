@@ -8,8 +8,7 @@ IGNORE = \
 	 byond2Preproc.java\
 	 byond2PreprocLexer.java\
 	 byond2PreprocBaseListener.java\
-	 byond2PreprocListener.java\
-	 byond2MacroEval.java
+	 byond2PreprocListener.java
 
 grammars = \
 	   byond2Lexer.g4\
@@ -30,11 +29,7 @@ all: $(classes) $(CLS)
 	javac -cp .:/media/usb3/media/download/antlr-4.2-complete.jar $<
 
 %.java: %.g4
-ifeq ('byond2Preproc.g4',$?)
-	java -jar /media/usb3/media/download/antlr-4.2-complete.jar -visitor $?
-else
 	java -jar /media/usb3/media/download/antlr-4.2-complete.jar $?
-endif
 
 clean:
 	-rm byond2Parser.java

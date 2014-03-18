@@ -27,6 +27,7 @@ class Main
             UnbufferedTokenStream tokens = new UnbufferedTokenStream(lexer);
             byond2Parser parser = new byond2Parser(tokens);
             parser.setBuildParseTree(false);
+            parser.removeParseListeners();
             RuleContext tree = parser.file();
             //tree.inspect(parser); // show in gui
             //tree.save(parser, "/tmp/R.ps"); // Generate postscript
