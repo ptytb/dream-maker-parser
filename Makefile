@@ -30,7 +30,11 @@ all: $(classes) $(CLS)
 	javac -cp .:/media/usb3/media/download/antlr-4.2-complete.jar $<
 
 %.java: %.g4
+ifeq ('byond2Preproc.g4',$?)
 	java -jar /media/usb3/media/download/antlr-4.2-complete.jar -visitor $?
+else
+	java -jar /media/usb3/media/download/antlr-4.2-complete.jar $?
+endif
 
 clean:
 	-rm byond2Parser.java
@@ -41,6 +45,10 @@ clean:
 	-rm byond2PreprocLexer.java
 	-rm byond2PreprocBaseListener.java
 	-rm byond2PreprocListener.java
+	-rm byond2PreprocVisitor.java
+	-rm byond2PreprocBaseVisitor.java
+	-rm byond2ParserBaseVisitor.java
+	-rm byond2ParserVisitor.java
 	-rm *.class
 	-rm *.tokens
 
