@@ -57,6 +57,10 @@ block
     |   block_indented
     ;
 
+line
+    :   statement (SEMI statement?)*
+    ;
+
 block_inner_switch
     :   newline*
         if_const
@@ -64,7 +68,7 @@ block_inner_switch
         |   newline
         )*
     (   ELSE
-        (newline* block | statement)? )?
+        (newline* block_proc | statement_proc)? )?
         newline*
     ;
 
@@ -85,14 +89,41 @@ block_switch
     |   block_indented_switch
     ;
 
-line
-    :   statement (SEMI statement?)*
-    |   label
+block_inner_proc
+    :   newline*
+
+    (   block_proc
+    |   line_proc )
+
+    (   newline line_proc
+    |   newline block_proc
+    |   newline
+    )*
+    ;
+
+block_braced_proc
+    :   LCURV line_proc?  RCURV
+    |   LCURV line_proc? newline+
+        (INDENT block_inner_proc?)?
+        (DEDENT newline* RCURV | RCURV (newline+ DEDENT)?)
+    ;
+
+block_indented_proc
+    :   INDENT block_inner_proc?  DEDENT
+    ;
+
+block_proc
+    :   block_braced_proc
+    |   block_indented_proc
+    ;
+
+line_proc
+    :   statement_proc (SEMI statement_proc?)*
     ;
 
 set
     :   SET
-        (   statement
+        (   op_assign
         |   expr IN expr
         )
     ;
@@ -120,7 +151,10 @@ path
     ;
 
 stat_var
-    :   VAR path listDef? (EQ expr)? ( COMMA path listDef? (EQ expr)? )*
+    :   VAR path
+    (   block
+    |   listDef? (EQ expr)? ( COMMA path listDef? (EQ expr)? )*
+    )
     ;
 
 listDef
@@ -133,7 +167,7 @@ procDef
         (   formalParameters
         |   POINT POINT POINT)?
         RPAREN
-        (newline* block | statement)
+        (newline* block_proc | statement_proc)
     ;
 
 procDecl
@@ -165,16 +199,16 @@ loop_for
         LPAREN
         (   (stat_var | expr) (AS path (BITOR path)*)? (IN expr)? (TO expr)?
             (STEP expr)?
-        |   (statement | block_braced)?
+        |   (statement_proc | block_braced_proc)?
             (SEMI | COMMA)
             (expr | LCURV SEMI* expr? SEMI* RCURV)?
             (
             (SEMI | COMMA)
-            (statement | block_braced)?
+            (statement_proc | block_braced_proc)?
             )?
         )?
         RPAREN
-        newline* (block | statement)
+        newline* (block_proc | statement_proc)
     ;
 
 callable
@@ -187,12 +221,12 @@ callable
 loop_while
     :   WHILE
         LPAREN expr RPAREN
-        newline* (block | statement)
+        newline* (block_proc | statement_proc)
     ;
 
 loop_do
     :   DO
-        newline* (block | statement)
+        newline* (block_proc | statement_proc)
         newline*
         WHILE LPAREN expr RPAREN
     ;
@@ -208,15 +242,15 @@ if_const
         |   expr (OR expr)*
         |   expr TO expr)
         RPAREN
-    (   newline* block | statement)?
+    (   newline* block_proc | statement_proc)?
         newline*
     ;
 
 if_cond
     :   IF LPAREN expr RPAREN
-    (   newline* block | statement)?
+    (   newline* block_proc | statement_proc)?
         newline*
-    (   ELSE (newline* block | statement)? )?
+    (   ELSE (newline* block_proc | statement_proc)? )?
         newline*
     ;
 
@@ -235,7 +269,7 @@ stat_cont
 stat_spawn
     :   SPAWN
         (LPAREN expr? RPAREN)?
-        newline* (block | statement)
+        newline* (block_proc | statement_proc)
     ;
 
 stat_del
@@ -306,6 +340,16 @@ statement
     |   procDef
     |   procDecl
     |   stat_var
+    |   op_assign
+    |   op_op_assign
+    |   (INC | DEC) expr
+    |   expr (INC | DEC)        
+    |   path newline* block
+    ;
+
+statement_proc
+    :   label
+    |   stat_var
     |   stat_internal
     |   set
     |   stat_del
@@ -328,7 +372,6 @@ statement
     |   (INC | DEC) expr
     |   expr (INC | DEC)        
     |   expr QMARK expr COLON expr
-    |   path newline* block
     ;
 
 expr
