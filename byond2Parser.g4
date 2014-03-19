@@ -20,7 +20,7 @@ label
 
 constant
     :   STRING
-    |   (PLUS | MINUS)? (INT | FLOAT | ID)
+    |   (PLUS | MINUS)? (INT | FLOAT)
     |   NULL
     ;
 
@@ -122,23 +122,23 @@ line_proc
     ;
 
 set
-    :   SET
-        (   op_assign
-        |   expr IN expr
-        )
+    :   SET ID (IN | EQ) expr
+    ;
+
+name
+    :   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | STEP | ID
     ;
 
 path_elem
-    :   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | STEP | ID | POINT+
+    :   name | POINT+
     ;
 
 op_deref
-    :   path_elem (POINT | COLON) (path_elem | op_deref)
+    :   name ((POINT | COLON) name)+
     ;
 
 path_expr
     :   internal_var 
-    |   WS? path_elem WS?
     |   WS? (SLASH | COLON | POINT) path_elem (SLASH path_elem)* SLASH? WS?
     ;
 
@@ -309,15 +309,8 @@ op_new
         (LPAREN actualParameters? RPAREN)?
     ;
 
-op_map_item
-    :   (constant | ID) EQ (constant | ID)
-    ;
-
 op_assign
-    :   expr
-        EQ <assoc=right>
-        expr
-        (AS path (IN expr)?)?
+    :   expr EQ <assoc=right> expr
     ;
 
 op_op_assign
@@ -396,12 +389,12 @@ expr
     |   expr QMARK expr COLON expr
     |   op_new
     |   stat_internal
-    |   procCall
-    |   op_map_item
-    |   constant
     |   expr IN expr (TO expr)?
+    |   procCall
     |   op_deref
     |   path_expr
+    |   constant
+    |   name
     ; 
 
 exprList
@@ -414,9 +407,7 @@ actualParameters
     ; 
     
 actualParameter
-    :   path
-    |   expr
-    |   op_assign
+    :   (expr | path) (EQ expr)?
     ;
 
 internal_var

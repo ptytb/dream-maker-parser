@@ -1,4 +1,5 @@
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.*;
 import java.io.*;
 
 class Main
@@ -6,13 +7,20 @@ class Main
     public static void main(String[] args) throws Exception
     {
         InputStream is;
+        long inputLength = 1;
 
         boolean optionPreprocessOnly = false;
 
         if (args.length > 0)
-            is = new FileInputStream(args[0]);
+        {
+            FileInputStream fis = new FileInputStream(args[0]);
+            inputLength = fis.getChannel().size();
+            is = fis;
+        }
         else
+        {
             is = System.in;
+        }
 
         Preprocessor preproc = new Preprocessor(is);
         preproc.addSearchPath("/media/usb3/Baystation12/Baystation12");
@@ -26,10 +34,18 @@ class Main
             lexer.setTokenFactory(new CommonTokenFactory(true));
             UnbufferedTokenStream tokens = new UnbufferedTokenStream(lexer);
             byond2Parser parser = new byond2Parser(tokens);
-            //parser.setBuildParseTree(false);
+
+            //parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+            //parser.removeErrorListeners();
+            //parser.setErrorHandler(new BailErrorStrategy());
+
+            parser.setBuildParseTree(false);
+
             parser.removeParseListeners();
+            parser.addParseListener(new MyParserListener(inputLength));
+
             RuleContext tree = parser.file();
-            tree.inspect(parser); // show in gui
+            //tree.inspect(parser); // show in gui
             //tree.save(parser, "/tmp/R.ps"); // Generate postscript
             //System.out.println(tree.toStringTree(parser));
         }
