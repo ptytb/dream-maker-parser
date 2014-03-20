@@ -125,8 +125,13 @@ set
     :   SET ID (IN | EQ) expr
     ;
 
+type
+    :   TEXT | MESSAGE | NUM | ICON | SOUND | FILE | KEY | NULL 
+    |   MOB | OBJ | TURF | AREA | ANYTHING
+    ;
+
 name
-    :   CALL | PICK | VAR | OBJ | PROC | NEW | LIST | STEP | ID
+    :   CALL | PICK | VAR | PROC | NEW | LIST | STEP | type | ID
     ;
 
 path_elem
@@ -153,7 +158,8 @@ path
 stat_var
     :   VAR path
     (   block
-    |   listDef? (EQ expr)? ( COMMA path listDef? (EQ expr)? )*
+    |   listDef? (EQ expr)? (AS type)?
+        (COMMA path listDef? (EQ expr)? (AS type)? )*
     )
     ;
 
@@ -185,19 +191,19 @@ formalParameters
     ; 
 
 formalParameter
-    :   path listDef? (EQ expr)? (AS path (BITOR path)*)? (IN expr)?  
+    :   path listDef? (EQ expr)? (AS type (BITOR type)*)? (IN expr)?  
     ;
 
 procCall
     :   callable LPAREN actualParameters? RPAREN
-    (   (IN expr)? (AS path (BITOR path)*)?
-    |   (AS path (BITOR path)*)? (IN expr)? )
+    (   (IN expr)? (AS type (BITOR type)*)?
+    |   (AS type (BITOR type)*)? (IN expr)? )
     ;
 
 loop_for
     :   FOR
         LPAREN
-        (   (stat_var | expr) (AS path (BITOR path)*)? (IN expr)? (TO expr)?
+        (   (stat_var | expr) (AS type (BITOR type)*)? (IN expr)? (TO expr)?
             (STEP expr)?
         |   (statement_proc | block_braced_proc)?
             (SEMI | COMMA)
@@ -214,7 +220,7 @@ loop_for
 callable
     :   super_ref
     |   var_default_ret
-    |   ID | LIST | STEP
+    |   name
     |   op_deref
     ;
 
@@ -329,7 +335,7 @@ op_op_assign
     ;
 
 statement
-    :   path (AS path (IN expr)?)?
+    :   path (AS type (IN expr)?)?
     |   procDef
     |   procDecl
     |   stat_var

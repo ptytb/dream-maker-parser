@@ -30,9 +30,11 @@ class Main
 
         if (!optionPreprocessOnly)
         {
-            byond2Lexer lexer = new byond2Lexer(new UnbufferedCharStream(pipe));
-            lexer.setTokenFactory(new CommonTokenFactory(true));
-            UnbufferedTokenStream tokens = new UnbufferedTokenStream(lexer);
+            //byond2Lexer lexer = new byond2Lexer(new UnbufferedCharStream(pipe));
+            //lexer.setTokenFactory(new CommonTokenFactory(true));
+            //UnbufferedTokenStream tokens = new UnbufferedTokenStream(lexer);
+            byond2Lexer lexer = new byond2Lexer(new ANTLRInputStream(pipe));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
             byond2Parser parser = new byond2Parser(tokens);
 
             //parser.getInterpreter().setPredictionMode(PredictionMode.SLL);

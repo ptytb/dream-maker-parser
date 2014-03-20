@@ -204,23 +204,45 @@ STEP : 'step' ;
 
 NULL : 'null' ;
 
-////////////////////////////////////////////////////////////////////////////////
-// types
-
 VAR : 'var' ;
-
-OBJ : 'obj' ;
 
 PROC : 'proc' ;
 
-LIST : 'list' ;
+////////////////////////////////////////////////////////////////////////////////
+// types
+
+TEXT : 'text' ;
+
+MESSAGE : 'message' ;
+
+NUM : 'num' ;
+
+ICON : 'icon' ;
+
+SOUND : 'sound' ;
+
+FILE : 'file';
+
+KEY : 'key';
+
+MOB : 'mob' ;
+
+OBJ : 'obj' ;
+
+TURF : 'turf' ;
+
+AREA : 'area' ;
+
+ANYTHING : 'anything' ;
 
 ////////////////////////////////////////////////////////////////////////////////
 // internal procs
 
-CALL :  'call';
+CALL : 'call';
 
-PICK    :   'pick';
+PICK : 'pick';
+
+LIST : 'list' ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
