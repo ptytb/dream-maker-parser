@@ -335,15 +335,11 @@ op_op_assign
     ;
 
 statement
-    :   path (AS type (IN expr)?)?
+    :   path (newline* block)?
     |   procDef
     |   procDecl
     |   stat_var
     |   op_assign
-    |   op_op_assign
-    |   (INC | DEC) expr
-    |   expr (INC | DEC)        
-    |   path newline* block
     ;
 
 statement_proc
