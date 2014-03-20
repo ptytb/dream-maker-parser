@@ -43,8 +43,8 @@ class Main
 
             parser.setBuildParseTree(false);
 
-            parser.removeParseListeners();
-            parser.addParseListener(new MyParserListener(inputLength));
+            //parser.removeParseListeners();
+            //parser.addParseListener(new MyParserListener(inputLength));
 
             RuleContext tree = parser.file();
             //tree.inspect(parser); // show in gui

@@ -15,7 +15,7 @@ newline
 
 label
     :   ID COLON?
-        newline* block?
+        newline? block?
     ;
 
 constant
@@ -30,26 +30,24 @@ file
     ;
 
 block_inner
-    :   newline*
-
-    (   block
-    |   line )
+    :   
+    (   line
+    |   block)
 
     (   newline line
-    |   newline block
-    |   newline
-    )*
+    |   newline block)*
+
+        newline?
     ;
 
 block_braced
     :   LCURV line?  RCURV
-    |   LCURV line? newline+
-        (INDENT block_inner?)?
-        (DEDENT newline* RCURV | RCURV (newline+ DEDENT)?)
+    |   LCURV line? newline INDENT? block_inner newline?
+        (RCURV newline DEDENT? | DEDENT? RCURV)
     ;
 
 block_indented
-    :   INDENT block_inner?  DEDENT
+    :   INDENT block_inner newline DEDENT
     ;
 
 block
@@ -62,14 +60,8 @@ line
     ;
 
 block_inner_switch
-    :   newline*
-        if_const
-        (   newline if_const
-        |   newline
-        )*
-    (   ELSE
-        (newline* block_proc | statement_proc)? )?
-        newline*
+    :   if_const (newline if_const)*
+    (   newline? ELSE (newline? block_proc | statement_proc)? )?
     ;
 
 block_braced_switch
@@ -79,9 +71,7 @@ block_braced_switch
     ;
 
 block_indented_switch
-    :   INDENT
-        block_inner_switch?
-        DEDENT
+    :   INDENT block_inner_switch newline DEDENT
     ;
 
 block_switch
@@ -90,26 +80,22 @@ block_switch
     ;
 
 block_inner_proc
-    :   newline*
-
-    (   block_proc
-    |   line_proc )
+    :   
+    (   line_proc
+    |   block_proc)
 
     (   newline line_proc
-    |   newline block_proc
-    |   newline
-    )*
+    |   newline block_proc)*
     ;
 
 block_braced_proc
     :   LCURV line_proc?  RCURV
-    |   LCURV line_proc? newline+
-        (INDENT block_inner_proc?)?
-        (DEDENT newline* RCURV | RCURV (newline+ DEDENT)?)
+    |   LCURV line_proc? newline INDENT? block_inner_proc newline?
+        (RCURV newline DEDENT? | DEDENT? RCURV)
     ;
 
 block_indented_proc
-    :   INDENT block_inner_proc?  DEDENT
+    :   INDENT block_inner_proc newline  DEDENT
     ;
 
 block_proc
@@ -168,26 +154,15 @@ listDef
     ;
 
 procDef
-    :   path
-        LPAREN
+    :   LPAREN
         (   formalParameters
         |   POINT POINT POINT)?
         RPAREN
-        (newline* block_proc | statement_proc)
+        (newline? block_proc | statement_proc)? // Is decl if omited
     ;
 
-procDecl
-    :   path
-        LPAREN
-        (   formalParameters
-        |   POINT POINT POINT)?
-        RPAREN
-    ;
 formalParameters
-    :   formalParameter
-        (   COMMA
-            formalParameter
-        )*
+    :   formalParameter (COMMA formalParameter)*
     ; 
 
 formalParameter
@@ -214,7 +189,7 @@ loop_for
             )?
         )?
         RPAREN
-        newline* (block_proc | statement_proc)
+        newline? (block_proc | statement_proc)
     ;
 
 callable
@@ -227,13 +202,13 @@ callable
 loop_while
     :   WHILE
         LPAREN expr RPAREN
-        newline* (block_proc | statement_proc)
+        newline? (block_proc | statement_proc)
     ;
 
 loop_do
     :   DO
-        newline* (block_proc | statement_proc)
-        newline*
+        newline? (block_proc | statement_proc)
+        newline?
         WHILE LPAREN expr RPAREN
     ;
 
@@ -248,16 +223,14 @@ if_const
         |   expr (OR expr)*
         |   expr TO expr)
         RPAREN
-    (   newline* block_proc | statement_proc)?
-        newline*
+    (   newline? block_proc | statement_proc)?
     ;
 
 if_cond
     :   IF LPAREN expr RPAREN
-    (   newline* block_proc | statement_proc)?
-        newline*
-    (   ELSE (newline* block_proc | statement_proc)? )?
-        newline*
+    (   newline? block_proc | statement_proc)?
+        newline?
+    (   ELSE (newline? block_proc | statement_proc)? )?
     ;
 
 stat_ret
@@ -275,7 +248,7 @@ stat_cont
 stat_spawn
     :   SPAWN
         (LPAREN expr? RPAREN)?
-        newline* (block_proc | statement_proc)
+        newline? (block_proc | statement_proc)
     ;
 
 stat_del
@@ -283,8 +256,7 @@ stat_del
     ;
 
 stat_switch
-    :   SWITCH LPAREN expr RPAREN
-        newline* block_switch
+    :   SWITCH LPAREN expr RPAREN newline? block_switch
     ;
 
 stat_call
@@ -335,9 +307,7 @@ op_op_assign
     ;
 
 statement
-    :   path (newline* block)?
-    |   procDef
-    |   procDecl
+    :   path (procDef | newline? block)?
     |   stat_var
     |   op_assign
     ;

@@ -121,7 +121,7 @@ import byond2Common;
 // white
 
 EMPTY_LINE
-    :   { getCharPositionInLine() == 0 }? WS NL -> skip
+    :   { getCharPositionInLine() == 0 }? WS? NL -> skip
     ;
 
 fragment NL
