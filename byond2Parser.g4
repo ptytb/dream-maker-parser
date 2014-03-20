@@ -141,18 +141,11 @@ path
     ) 
     ;
 
-block_var
-    :   INDENT
-    (   path (newline block_var)?
-    |   (name | op_assign) newline)+
-        newline? DEDENT
-    ;
-
 stat_var
     :   VAR 
     (   path listDef? (EQ expr)? (AS type)? (COMMA
         path listDef? (EQ expr)? (AS type)? )*
-    |   newline block_var)
+    |   path? newline? block)
     ;
 
 listDef
