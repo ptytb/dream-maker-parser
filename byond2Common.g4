@@ -37,10 +37,10 @@ fragment STRING_MACRO
     |   '...'
     |   'n' | '"' | '\\' | '<' | '>' | ' ' | '\n' | '[' | ']' | 't' | '\''
     |   'b' | 'i' | 'u'
-    |   COLOR)
+    |   MACRO_COLOR)
     ;
 
-fragment COLOR
+fragment MACRO_COLOR
     :   'black' //#000000
     |   'silver'//#C0C0C0
     |   'gray' 	//#808080

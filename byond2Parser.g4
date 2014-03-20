@@ -113,7 +113,7 @@ set
 
 type
     :   TEXT | MESSAGE | NUM | ICON | SOUND | FILE | KEY | NULL 
-    |   MOB | OBJ | TURF | AREA | ANYTHING
+    |   MOB | OBJ | TURF | AREA | ANYTHING | COLOR
     ;
 
 name
@@ -161,7 +161,7 @@ procDef
     ;
 
 formalParameters
-    :   formalParameter (COMMA formalParameter)*
+    :   COMMA* formalParameter (COMMA formalParameter)* COMMA*
     ; 
 
 formalParameter
