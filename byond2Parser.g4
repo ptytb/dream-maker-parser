@@ -47,7 +47,7 @@ block_braced
     ;
 
 block_indented
-    :   INDENT block_inner newline DEDENT
+    :   INDENT block_inner newline? DEDENT
     ;
 
 block
@@ -71,7 +71,7 @@ block_braced_switch
     ;
 
 block_indented_switch
-    :   INDENT block_inner_switch newline DEDENT
+    :   INDENT block_inner_switch newline? DEDENT
     ;
 
 block_switch
@@ -95,7 +95,7 @@ block_braced_proc
     ;
 
 block_indented_proc
-    :   INDENT block_inner_proc newline  DEDENT
+    :   INDENT block_inner_proc newline?  DEDENT
     ;
 
 block_proc
