@@ -25,11 +25,11 @@ constant
     ;
 
 file
-    :   block_inner
+    :   blockInner
         EOF
     ;
 
-block_inner
+blockInner
     :   
     (   line
     |   block)
@@ -40,71 +40,71 @@ block_inner
         newline?
     ;
 
-block_braced
+blockBraced
     :   LCURV line?  RCURV
-    |   LCURV line? newline INDENT? block_inner newline?
+    |   LCURV line? newline INDENT? blockInner newline?
         (RCURV newline DEDENT? | DEDENT? RCURV)
     ;
 
-block_indented
-    :   INDENT block_inner newline? DEDENT
+blockIndented
+    :   INDENT blockInner newline? DEDENT
     ;
 
 block
-    :   block_braced
-    |   block_indented
+    :   blockBraced
+    |   blockIndented
     ;
 
 line
     :   statement (SEMI statement?)*
     ;
 
-block_inner_switch
-    :   if_const (newline if_const)*
-    (   newline? ELSE (newline? block_proc | statement_proc)? )?
+blockInnerSwitch
+    :   ifConst (newline ifConst)*
+    (   newline? ELSE (newline? blockProc | statementProc)? )?
     ;
 
-block_braced_switch
+blockBracedSwitch
     :   LCURV
-        block_inner_switch?
+        blockInnerSwitch?
         RCURV
     ;
 
-block_indented_switch
-    :   INDENT block_inner_switch newline? DEDENT
+blockIndentedSwitch
+    :   INDENT blockInnerSwitch newline? DEDENT
     ;
 
-block_switch
-    :   block_braced_switch
-    |   block_indented_switch
+blockSwitch
+    :   blockBracedSwitch
+    |   blockIndentedSwitch
     ;
 
-block_inner_proc
+blockInnerProc
     :   
-    (   line_proc
-    |   block_proc)
+    (   lineProc
+    |   blockProc)
 
-    (   newline line_proc
-    |   newline block_proc)*
+    (   newline lineProc
+    |   newline blockProc)*
     ;
 
-block_braced_proc
-    :   LCURV line_proc?  RCURV
-    |   LCURV line_proc? newline INDENT? block_inner_proc newline?
+blockBracedProc
+    :   LCURV lineProc?  RCURV
+    |   LCURV lineProc? newline INDENT? blockInnerProc newline?
         (RCURV newline DEDENT? | DEDENT? RCURV)
     ;
 
-block_indented_proc
-    :   INDENT block_inner_proc newline?  DEDENT
+blockIndentedProc
+    :   INDENT blockInnerProc newline?  DEDENT
     ;
 
-block_proc
-    :   block_braced_proc
-    |   block_indented_proc
+blockProc
+    :   blockBracedProc
+    |   blockIndentedProc
     ;
 
-line_proc
-    :   statement_proc (SEMI statement_proc?)*
+lineProc
+    :   statementProc (SEMI statementProc?)*
     ;
 
 set
@@ -120,31 +120,38 @@ name
     :   CALL | PICK | VAR | PROC | NEW | LIST | STEP | type | ID
     ;
 
-path_elem
+pathElem
     :   name | POINT+
     ;
 
-op_deref
+opDeref
     :   name ((POINT | COLON) name)+
     ;
 
-path_expr
-    :   internal_var 
-    |   WS? (SLASH | COLON | POINT) path_elem (SLASH path_elem)* SLASH? WS?
+pathExpr
+    :   internalVar 
+    |   WS? (SLASH | COLON | POINT) pathElem (SLASH pathElem)* SLASH? WS?
     ;
 
 path
     :   WS?
-    (   internal_var
-    |   (SLASH | COLON | POINT)? path_elem (SLASH path_elem)* SLASH? WS?
+    (   internalVar
+    |   (SLASH | COLON | POINT)? pathElem (SLASH pathElem)* SLASH? WS?
     |   (SLASH | COLON | POINT) WS?
     ) 
     ;
 
-stat_var
+statVarDef
+    :   path listDef? (EQ expr)? (AS type)?
+    ;
+
+statVarDefList
+    :   statVarDef (COMMA statVarDef)*
+    ;
+
+statVar
     :   VAR 
-    (   path listDef? (EQ expr)? (AS type)? (COMMA
-        path listDef? (EQ expr)? (AS type)? )*
+    (   statVarDefList
     |   path? newline? block)
     ;
 
@@ -157,7 +164,7 @@ procDef
         (   formalParameters
         |   POINT POINT POINT)?
         RPAREN
-        (newline? block_proc | statement_proc)? // Is decl if omited
+        (newline? blockProc | statementProc)? // Is decl if omited
     ;
 
 formalParameters
@@ -174,91 +181,91 @@ procCall
     |   (AS type (BITOR type)*)? (IN expr)? )
     ;
 
-loop_for
+loopFor
     :   FOR
         LPAREN
-        (   (stat_var | expr) (AS type (BITOR type)*)? (IN expr)? (TO expr)?
+        (   (statVarDef | expr) (AS type (BITOR type)*)? (IN expr)? (TO expr)?
             (STEP expr)?
-        |   (statement_proc | block_braced_proc)?
+        |   (statementProc | blockBracedProc)?
             (SEMI | COMMA)
             (expr | LCURV SEMI* expr? SEMI* RCURV)?
             (
             (SEMI | COMMA)
-            (statement_proc | block_braced_proc)?
+            (statementProc | blockBracedProc)?
             )?
         )?
         RPAREN
-        newline? (block_proc | statement_proc)
+        newline? (blockProc | statementProc)
     ;
 
 callable
-    :   super_ref
-    |   var_default_ret
+    :   superRef
+    |   varDefaultRet
     |   name
-    |   op_deref
+    |   opDeref
     ;
 
-loop_while
+loopWhile
     :   WHILE
         LPAREN expr RPAREN
-        newline? (block_proc | statement_proc)
+        newline? (blockProc | statementProc)
     ;
 
-loop_do
+loopDo
     :   DO
-        newline? (block_proc | statement_proc)
+        newline? (blockProc | statementProc)
         newline?
         WHILE LPAREN expr RPAREN
     ;
 
-stat_goto
+statGoto
     :   GOTO ID
     ;
 
-if_const
+ifConst
     :   IF
         LPAREN
         (   expr (COMMA expr)* COMMA?
         |   expr (OR expr)*
         |   expr TO expr)
         RPAREN
-    (   newline? block_proc | statement_proc)?
+    (   newline? blockProc | statementProc)?
     ;
 
-if_cond
+ifCond
     :   IF LPAREN expr RPAREN
-    (   newline? block_proc | statement_proc)?
+    (   newline? blockProc | statementProc)?
         newline?
-    (   ELSE (newline? block_proc | statement_proc)? )?
+    (   ELSE (newline? blockProc | statementProc)? )?
     ;
 
-stat_ret
+statRet
     :   RETURN expr?
     ;
 
-stat_break
+statBreak
     :   BREAK ID?
     ;
 
-stat_cont
+statCont
     :   CONTINUE ID?
     ;
 
-stat_spawn
+statSpawn
     :   SPAWN
         (LPAREN expr? RPAREN)?
-        newline? (block_proc | statement_proc)
+        newline? (blockProc | statementProc)
     ;
 
-stat_del
+statDel
     :   DEL expr
     ;
 
-stat_switch
-    :   SWITCH LPAREN expr RPAREN newline? block_switch
+statSwitch
+    :   SWITCH LPAREN expr RPAREN newline? blockSwitch
     ;
 
-stat_call
+statCall
     :   CALL 
         LPAREN
         (expr (COMMA expr?)?)?
@@ -268,29 +275,29 @@ stat_call
         RPAREN
     ;
 
-stat_pick
+statPick
     :   PICK 
         LPAREN
         (expr (SEMI* expr SEMI*)? COMMA?)* 
         RPAREN
     ;
 
-stat_internal
-    :   stat_call
-    |   stat_pick
+statInternal
+    :   statCall
+    |   statPick
     ;
 
-op_new
+opNew
     :   NEW 
-        (path | op_deref)?
+        (path | opDeref)?
         (LPAREN actualParameters? RPAREN)?
     ;
 
-op_assign
+opAssign
     :   expr EQ <assoc=right> expr
     ;
 
-op_op_assign
+opOpAssign
     :   expr
     (   EQPLUS <assoc=right>
     |   EQMINUS <assoc=right>
@@ -307,30 +314,29 @@ op_op_assign
 
 statement
     :   path (procDef | newline? block)?
-    |   stat_var
-    |   op_assign
+    |   opAssign
     ;
 
-statement_proc
+statementProc
     :   label
-    |   stat_var
-    |   stat_internal
+    |   statVar
+    |   statInternal
     |   set
-    |   stat_del
-    |   loop_for
-    |   loop_do
-    |   loop_while
-    |   if_cond
-    |   stat_switch
-    |   stat_ret
-    |   stat_break
-    |   stat_cont
-    |   stat_goto
-    |   stat_spawn
+    |   statDel
+    |   loopFor
+    |   loopDo
+    |   loopWhile
+    |   ifCond
+    |   statSwitch
+    |   statRet
+    |   statBreak
+    |   statCont
+    |   statGoto
+    |   statSpawn
     |   procCall
-    |   op_assign
-    |   op_op_assign
-    |   op_new
+    |   opAssign
+    |   opOpAssign
+    |   opNew
     |   expr BITSHR expr
     |   expr BITSHL expr
     |   (INC | DEC) expr
@@ -358,12 +364,12 @@ expr
     |   expr (AND) expr
     |   expr (OR) expr
     |   expr QMARK expr COLON expr
-    |   op_new
-    |   stat_internal
+    |   opNew
+    |   statInternal
     |   expr IN expr (TO expr)?
     |   procCall
-    |   op_deref
-    |   path_expr
+    |   opDeref
+    |   pathExpr
     |   constant
     |   name
     ; 
@@ -381,17 +387,17 @@ actualParameter
     :   (expr | path) (EQ expr)?
     ;
 
-internal_var
-    :   var_default_ret
-    |   super_ref
+internalVar
+    :   varDefaultRet
+    |   superRef
     |   NULL
     ;
 
-var_default_ret
+varDefaultRet
     :   POINT 
     ;
 
-super_ref
+superRef
     :   POINT POINT
     ;
 
