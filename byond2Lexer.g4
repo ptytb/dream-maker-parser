@@ -8,8 +8,16 @@ import byond2Common;
 {
     private int nesting = 0;
     private int indentLevel = 0;
+    private int indentUnit = 0;
     private int prevTokenType = EOF;
-    
+    private String fileName = null;
+
+    @Override
+    public String getSourceName()
+    {
+        return fileName != null ? fileName : IntStream.UNKNOWN_SOURCE_NAME;
+    }
+
     // Support multiple tokens add
     private final java.util.Deque<Token> pendingTokens =
         new java.util.ArrayDeque<>();
@@ -47,6 +55,20 @@ import byond2Common;
     private void emitIndent()
     {
         int indent = getText().length();
+    
+        if (indentLevel == 0)
+        {
+            indentUnit = indent;
+            indent = 1;
+        }
+        else
+        {
+            if (indent % indentUnit != 0)
+            {
+                throw new RuntimeException("Invalid indent, line " + getLine());
+            }
+            indent /= indentUnit;
+        }
 
         if (indent > indentLevel)
         {
@@ -81,6 +103,7 @@ import byond2Common;
             
             if (type != LEADING_WS
                 && type != IGNORE_NEWLINE
+                && type != MACRO_LINE
                 && token.getCharPositionInLine() == 0
                 && nesting == 0)
             {
@@ -102,6 +125,29 @@ import byond2Common;
                         pendingTokens.add(token);
                     break;
 
+                case MACRO_LINE:
+                    String macro = getText().trim();
+
+                    int numEnd = macro.indexOf(" ", 6);
+                    if (numEnd < 0)
+                        numEnd = macro.length();
+
+                    int line = Integer.parseInt(macro.substring(6, numEnd));
+
+                    String name = null;
+                    if (numEnd != macro.length())
+                        name = macro.substring(numEnd + 1, macro.length());
+
+                    setLine(line);
+                    fileName = name;
+                    /*System.err.println("file " + name + " line " + line);*/
+                    break;
+
+                /*case RCURV:*/
+                    /*pendingTokens.add(token);*/
+                    /*pendingTokens.add(new CommonToken(SEMI, ";"));*/
+                    /*break;*/
+
                 case EOF:
                     dedentAll();
 
@@ -118,15 +164,19 @@ import byond2Common;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// white
+// macro
 
+MACRO_LINE : NL? '#line ' INT (' ' STRING)? NL;
+
+////////////////////////////////////////////////////////////////////////////////
+// white
+//
 EMPTY_LINE
     :   { getCharPositionInLine() == 0 }? WS? NL -> skip
     ;
 
 fragment NL
-    :   '\r'? '\n'
-    |   '\r'
+    :   '\r'? '\n' | '\r'
     ;
 
 LEADING_WS

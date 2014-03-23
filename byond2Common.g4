@@ -14,7 +14,7 @@ fragment EVAL
     ;
 
 fragment STRING_MULTILINE
-    :   '{"' .*? '"}'
+    :   '{"' (STRING_MACRO | .)*? '"}'
     ;
 
 fragment STRING_MACRO

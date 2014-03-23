@@ -2,11 +2,16 @@ import org.antlr.v4.runtime.*;
 
 class byond2ErrorListener extends BaseErrorListener
 {
-    FileNameBinding fb;
-
-    byond2ErrorListener(FileNameBinding fb)
+    interface GetSourceName
     {
-        this.fb = fb;
+	String get();
+    }
+
+    private GetSourceName getSourceName;
+
+    byond2ErrorListener(GetSourceName sn)
+    {
+        this.getSourceName = sn;
     }
 
     @Override
@@ -18,13 +23,8 @@ class byond2ErrorListener extends BaseErrorListener
                String msg,
                RecognitionException e)
     {
-        System.err.println(fb.fileName + "line " + line + ", char "
+        System.err.println(getSourceName.get() + " line " + line + ", char "
                 + charPositionInLine + " " + msg);
-    }
-
-    static class FileNameBinding
-    {
-        String fileName;
     }
 }
 

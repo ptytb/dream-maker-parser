@@ -34,11 +34,14 @@ class Main
             //lexer.setTokenFactory(new CommonTokenFactory(true));
             //UnbufferedTokenStream tokens = new UnbufferedTokenStream(lexer);
             byond2Lexer lexer = new byond2Lexer(new ANTLRInputStream(pipe));
+            lexer.removeErrorListeners();
+            lexer.addErrorListener(new byond2ErrorListener(
+                        () -> lexer.getSourceName()));
+
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             byond2Parser parser = new byond2Parser(tokens);
 
             //parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-            //parser.removeErrorListeners();
             //parser.setErrorHandler(new BailErrorStrategy());
 
             parser.setBuildParseTree(false);

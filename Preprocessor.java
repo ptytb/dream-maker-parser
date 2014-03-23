@@ -4,6 +4,13 @@ import java.util.*;
 
 class FileState
 {
+    File file;
+    InputStream fs;
+    long offset;
+    byond2PreprocLexer lexer;
+    String name;
+    static BaseErrorListener errorListener;
+
     FileState(String name) throws FileNotFoundException
     {
         file = new File(name);
@@ -48,13 +55,6 @@ class FileState
             fs.skip(offset);
         }
     }
-
-    File file;
-    InputStream fs;
-    long offset;
-    byond2PreprocLexer lexer;
-    String name;
-    static BaseErrorListener errorListener;
 }
 
 class Preprocessor implements Runnable
@@ -68,13 +68,10 @@ class Preprocessor implements Runnable
     // Current macro
     private Vector<Token> macro = new Vector<Token>();
     
-    private byond2ErrorListener.FileNameBinding fileNameBinding =
-        new byond2ErrorListener.FileNameBinding();
-
     private Vector<String> paths = new Vector<String>();
 
-    private BaseErrorListener errorListener = new byond2ErrorListener(
-            fileNameBinding);
+    private byond2ErrorListener errorListener = new byond2ErrorListener(
+            () -> file.name );
 
     Preprocessor(InputStream is) throws IOException
     {
@@ -122,15 +119,15 @@ class Preprocessor implements Runnable
             FileState tryFile = new FileState(longName);
             files.push(file);
             file = tryFile;
-            //System.err.println("PUSH " + fileNameBinding.fileName + " CUR " + longName);
-            fileNameBinding.fileName = longName;
+            pipe.write(String.format("\n#line 1 \"%s\"\n", file.name));
+            // no need for additional \n cause it's added after #include ... \n
         }
         catch (IOException e) { }
     }
 
     private void evalMacro()
     {
-        byond2MacroEval e = new byond2MacroEval();
+        byond2MacroEval e = new byond2MacroEval(errorListener);
         String name = e.eval(macro);
         if (name != null)
         {
@@ -165,9 +162,9 @@ class Preprocessor implements Runnable
                 if (!files.empty())
                 {
                     file = files.pop();
-                    fileNameBinding.fileName = file.name;
-                    //System.err.println("POP " + fileNameBinding.fileName);
-                    pipe.write("\n");
+                    pipe.write(String.format("\n\n#line %d \"%s\"\n",
+                                file.lexer.getLine(),
+                                file.name));
                     return true;
                 }
                 break;
@@ -184,10 +181,7 @@ class Preprocessor implements Runnable
                         // popMode() called by Lexer in NL handler
                         flushMacro();
                     }
-                    else
-                    {
-                        pipe.write(token.getText());
-                    }
+                    pipe.write(token.getText());
                 }
         }
 

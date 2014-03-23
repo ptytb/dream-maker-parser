@@ -15,8 +15,7 @@ class byond2MacroListener extends byond2PreprocBaseListener
     Object result;
 
     @Override
-    public void enterMacro_include_rel(
-            byond2Preproc.Macro_include_relContext ctx)
+    public void enterMacroIncludeRel(byond2Preproc.MacroIncludeRelContext ctx)
     {
         String text = ctx.getText().substring(7);
         text = text.replace("\\", "/");

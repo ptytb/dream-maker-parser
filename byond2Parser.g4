@@ -14,8 +14,7 @@ newline
     ;
 
 label
-    :   ID COLON?
-        newline? block?
+    :   ID COLON? newline? blockProc?
     ;
 
 constant
@@ -25,25 +24,22 @@ constant
     ;
 
 file
-    :   blockInner
+    :   blockInner?
+        newline?
         EOF
     ;
 
 blockInner
-    :   
-    (   line
-    |   block)
+    :   statement ((SEMI | newline) statement?)*
+    ;
 
-    (   newline line
-    |   newline block)*
-
-        newline?
+statementLine
+    :   statement (SEMI statement?)*
     ;
 
 blockBraced
-    :   LCURV line?  RCURV
-    |   LCURV line? newline INDENT? blockInner newline?
-        (RCURV newline DEDENT? | DEDENT? RCURV)
+    :   LCURV statementLine? (newline (INDENT (blockInner newline?)?)?)?
+        (RCURV (newline? DEDENT)* | (DEDENT newline)* RCURV)
     ;
 
 blockIndented
@@ -55,19 +51,13 @@ block
     |   blockIndented
     ;
 
-line
-    :   statement (SEMI statement?)*
-    ;
-
 blockInnerSwitch
     :   ifConst (newline ifConst)*
     (   newline? ELSE (newline? blockProc | statementProc)? )?
     ;
 
 blockBracedSwitch
-    :   LCURV
-        blockInnerSwitch?
-        RCURV
+    :   LCURV blockInnerSwitch? RCURV
     ;
 
 blockIndentedSwitch
@@ -80,31 +70,25 @@ blockSwitch
     ;
 
 blockInnerProc
-    :   
-    (   lineProc
-    |   blockProc)
+    :   statementProc ((SEMI | newline) statementProc?)*
+    ;
 
-    (   newline lineProc
-    |   newline blockProc)*
+statementProcLine
+    :   statementProc (SEMI statementProc?)*
     ;
 
 blockBracedProc
-    :   LCURV lineProc?  RCURV
-    |   LCURV lineProc? newline INDENT? blockInnerProc newline?
-        (RCURV newline DEDENT? | DEDENT? RCURV)
+    :   LCURV statementProcLine? (newline (INDENT (blockInnerProc newline?)?)?)?
+        (RCURV (newline? DEDENT)* | (DEDENT newline)* RCURV)
     ;
 
 blockIndentedProc
-    :   INDENT blockInnerProc newline?  DEDENT
+    :   INDENT blockInnerProc newline? DEDENT
     ;
 
 blockProc
     :   blockBracedProc
     |   blockIndentedProc
-    ;
-
-lineProc
-    :   statementProc (SEMI statementProc?)*
     ;
 
 set
@@ -129,16 +113,13 @@ opDeref
     ;
 
 pathExpr
-    :   internalVar 
-    |   WS? (SLASH | COLON | POINT) pathElem (SLASH pathElem)* SLASH? WS?
+    :   WS? (SLASH | COLON | POINT) pathElem (SLASH pathElem)* SLASH? WS?
     ;
 
 path
     :   WS?
-    (   internalVar
-    |   (SLASH | COLON | POINT)? pathElem (SLASH pathElem)* SLASH? WS?
-    |   (SLASH | COLON | POINT) WS?
-    ) 
+    (   (SLASH | COLON | POINT)? pathElem (SLASH pathElem)* SLASH? WS?
+    |   (SLASH | COLON | POINT) WS?) 
     ;
 
 statVarDef
@@ -199,8 +180,8 @@ loopFor
     ;
 
 callable
-    :   superRef
-    |   varDefaultRet
+    :   varSuper
+    |   varSelf
     |   name
     |   opDeref
     ;
@@ -308,13 +289,16 @@ opOpAssign
     |   EQBITAND <assoc=right>
     |   EQBITRSH <assoc=right>
     |   EQBITLSH <assoc=right>
-    |   EQBITXOR <assoc=right> )
+    |   EQBITXOR <assoc=right>)
         expr
     ;
 
 statement
-    :   path (procDef | newline? block)?
-    |   opAssign
+    :   path
+    (   procDef
+    |   newline? block
+    |   listDef? EQ <assoc=right> expr)?
+    |   statVar
     ;
 
 statementProc
@@ -372,6 +356,7 @@ expr
     |   pathExpr
     |   constant
     |   name
+    |   varInternal 
     ; 
 
 exprList
@@ -379,25 +364,24 @@ exprList
     ; 
 
 actualParameters
-    :   (actualParameter | COMMA actualParameter?)
-        (COMMA actualParameter | COMMA)*
+    :   (actualParameter | COMMA actualParameter?) (COMMA actualParameter?)*
     ; 
     
 actualParameter
     :   (expr | path) (EQ expr)?
     ;
 
-internalVar
-    :   varDefaultRet
-    |   superRef
+varInternal
+    :   varSelf
+    |   varSuper
     |   NULL
     ;
 
-varDefaultRet
+varSelf
     :   POINT 
     ;
 
-superRef
+varSuper
     :   POINT POINT
     ;
 

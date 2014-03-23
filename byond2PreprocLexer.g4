@@ -4,6 +4,17 @@ import byond2WhiteSpace, byond2Common;
 ////////////////////////////////////////////////////////////////////////////////
 // plain mode
 
+NL
+    :   ('\r'? '\n' | '\r')
+        {
+            if (joinedLines > 0)
+            {
+                joinedLines = 0;
+                setText(String.format("\n\n#line %d\n", getLine()));
+            }
+        }
+    ;
+
 MACRO
     : '#' { pushMode(Macro); skip(); }
     ;
@@ -25,9 +36,12 @@ MACRO_LINE_ESCAPE
     :   LINE_ESCAPE -> type(LINE_ESCAPE), skip
     ;
 
-NL
-    :   ( '\r'? '\n' | '\r')
-        { popMode(); }
+MACRO_NL
+    :   NL
+        {
+            setType(NL);
+            popMode();
+        }
     ;
 
 WS

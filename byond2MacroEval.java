@@ -5,6 +5,13 @@ import java.util.*;
 class byond2MacroEval
 {
     private String name;
+
+    private byond2ErrorListener errorListener;
+
+    byond2MacroEval(byond2ErrorListener el)
+    {
+	errorListener = el;
+    }
     
     public String eval(Vector<Token> macro)
     {
@@ -12,8 +19,8 @@ class byond2MacroEval
         CommonTokenStream macroTokens = new CommonTokenStream(macroStream);
         byond2Preproc parser = new byond2Preproc(macroTokens);
         //parser.setBuildParseTree(false);
-        //parser.removeErrorListeners();
-        //parser.addErrorListener(errorListener);
+        parser.removeErrorListeners();
+        parser.addErrorListener(errorListener);
         //parser.removeParseListeners();
         //parser.addParseListener(new byond2MacroListener());
         RuleContext tree = parser.macro();
