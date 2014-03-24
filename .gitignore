@@ -19,4 +19,4 @@ byond2ParserBaseVisitor.java
 byond2ParserVisitor.java
 byond2PreprocBaseVisitor.java
 byond2PreprocVisitor.java
-
+byond2Common.java

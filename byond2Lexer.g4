@@ -19,11 +19,11 @@ import byond2Common;
     }
 
     // Support multiple tokens add
-    private final java.util.Deque<Token> pendingTokens =
+    private final java.util.ArrayDeque<Token> pendingTokens =
         new java.util.ArrayDeque<>();
         
     // Simple token look-ahead, required for DIV token recognition
-    private final java.util.Deque<Token> aheadTokens =
+    private final java.util.ArrayDeque<Token> aheadTokens =
         new java.util.ArrayDeque<>();
 
     private void indent(int n)
@@ -31,7 +31,7 @@ import byond2Common;
         indentLevel += n;
         while (n > 0)
         {
-            pendingTokens.add(new CommonToken(INDENT, "INDENT"));
+            addToken(INDENT, "INDENT");
             --n;
         }
     }
@@ -41,8 +41,8 @@ import byond2Common;
         indentLevel -= n;
         while (n > 0)
         {
-            pendingTokens.add(new CommonToken(DEDENT, "DEDENT"));
-            pendingTokens.add(new CommonToken(IGNORE_NEWLINE, "NL"));
+            addToken(DEDENT, "DEDENT");
+            addToken(IGNORE_NEWLINE, "NL");
             --n;
         }
     }
@@ -87,6 +87,19 @@ import byond2Common;
         return t;
     }
 
+    private void addToken(int type, String text)
+    {
+        pendingTokens.add(_factory.create(
+            _tokenFactorySourcePair,
+            type,
+            text,
+            Token.DEFAULT_CHANNEL,
+            _tokenStartCharIndex,
+            _tokenStartCharIndex,
+            _tokenStartLine,
+            _tokenStartCharPositionInLine));
+    }
+
     @Override
     public Token nextToken()
     {
@@ -101,10 +114,10 @@ import byond2Common;
 
             int type = token.getType();
             
-            if (type != LEADING_WS
+            if (token.getCharPositionInLine() == 0
+                && type != LEADING_WS
                 && type != IGNORE_NEWLINE
                 && type != MACRO_LINE
-                && token.getCharPositionInLine() == 0
                 && nesting == 0)
             {
                 dedentAll();
@@ -114,7 +127,7 @@ import byond2Common;
             {
                 case PICK:
                     if (prevTokenType == SLASH)
-                        pendingTokens.add(new CommonToken(ID, token.getText()));
+                        addToken(ID, token.getText());
                     else
                         pendingTokens.add(token);
                     break;
@@ -145,7 +158,7 @@ import byond2Common;
 
                 /*case RCURV:*/
                     /*pendingTokens.add(token);*/
-                    /*pendingTokens.add(new CommonToken(SEMI, ";"));*/
+                    /*addToken(SEMI, ";");*/
                     /*break;*/
 
                 case EOF:
