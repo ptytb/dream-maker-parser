@@ -9,9 +9,10 @@ lexer grammar byond2WhiteSpace;
 // white
 
 ML_COMMENT
-    :   '/*' (ML_COMMENT | .)*? '*/'
+    :   ({ getCharPositionInLine() == 0 }? WS)?
+        '/*' (ML_COMMENT | .)*? '*/'
         {
-            setText(String.format("\n#line %d\n", getLine()));
+            setText(String.format("# %d ", getLine()));
         }
     ;
 

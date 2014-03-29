@@ -40,9 +40,9 @@ class Main
 
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             byond2Parser parser = new byond2Parser(tokens);
+            parser.setErrorHandler(new byond2ReportError());
 
             //parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-            //parser.setErrorHandler(new BailErrorStrategy());
 
             parser.setBuildParseTree(false);
 

@@ -119,7 +119,7 @@ class Preprocessor implements Runnable
             FileState tryFile = new FileState(longName);
             files.push(file);
             file = tryFile;
-            pipe.write(String.format("\n#line 1 \"%s\"\n", file.name));
+            pipe.write(String.format("# 1 \"%s\" ", file.name));
             // no need for additional \n cause it's added after #include ... \n
         }
         catch (IOException e) { }
@@ -162,7 +162,7 @@ class Preprocessor implements Runnable
                 if (!files.empty())
                 {
                     file = files.pop();
-                    pipe.write(String.format("\n\n#line %d \"%s\"\n",
+                    pipe.write(String.format("\n# %d \"%s\" ",
                                 file.lexer.getLine(),
                                 file.name));
                     return true;

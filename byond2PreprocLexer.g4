@@ -10,7 +10,7 @@ NL
             if (joinedLines > 0)
             {
                 joinedLines = 0;
-                setText(String.format("\n\n#line %d\n", getLine()));
+                setText(String.format("# %d \n", getLine() - 1));
             }
         }
     ;

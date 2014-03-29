@@ -11,11 +11,14 @@ import byond2Common;
     private int indentUnit = 0;
     private int prevTokenType = EOF;
     private String fileName = null;
+    private int macroStartCharPositionInLine;
 
     @Override
     public String getSourceName()
     {
-        return fileName != null ? fileName : IntStream.UNKNOWN_SOURCE_NAME;
+        return (fileName != null)
+            ? fileName
+            : IntStream.UNKNOWN_SOURCE_NAME;
     }
 
     // Support multiple tokens add
@@ -100,23 +103,58 @@ import byond2Common;
             _tokenStartCharPositionInLine));
     }
 
+    private void parseMacroLine(String macro)
+    {
+        int start = macro.indexOf("#");
+        if (start < 0)
+        {
+            return;
+        }
+
+        int numEnd = macro.indexOf(" ", start + 2);
+        if (numEnd < 0)
+        {
+            numEnd = macro.length();
+        }
+
+        int line = Integer.parseInt(macro.substring(start + 2, numEnd));
+
+        String name = null;
+        if (numEnd != macro.length())
+        {
+            name = macro.substring(numEnd + 1, macro.length());
+        }
+
+        setLine(line);
+        fileName = name;
+        macroStartCharPositionInLine = _tokenStartCharPositionInLine;
+    }
+
     @Override
     public Token nextToken()
     {
         while (pendingTokens.isEmpty())
         {
-            Token token = null;
+            Token token;
 
             if (!aheadTokens.isEmpty())
+            {
                 token = aheadTokens.poll();
+            }
             else
+            {
                 token = super.nextToken();
+            }
 
             int type = token.getType();
             
-            if (token.getCharPositionInLine() == 0
+            int tokenLinePosition = (prevTokenType == MACRO_LINE)
+                ? macroStartCharPositionInLine
+                : token.getCharPositionInLine();
+
+            if (tokenLinePosition == 0
+                && type != EMPTY_LINE
                 && type != LEADING_WS
-                && type != IGNORE_NEWLINE
                 && type != MACRO_LINE
                 && nesting == 0)
             {
@@ -125,41 +163,27 @@ import byond2Common;
 
             switch (type)
             {
-                case PICK:
-                    if (prevTokenType == SLASH)
-                        addToken(ID, token.getText());
-                    else
-                        pendingTokens.add(token);
-                    break;
+                case LBRACK: nesting++; break;
+                case RBRACK: nesting--; break; 
+                case LPAREN: nesting++; break;
+                case RPAREN: nesting--; break;
+            }
 
+            switch (type)
+            {
                 case WS:
                     if (prevTokenType == SLASH
                         || ahead().getType() == SLASH)
+                    {
                         pendingTokens.add(token);
+                    }
                     break;
 
+                case EMPTY_LINE:
                 case MACRO_LINE:
                     String macro = getText().trim();
-
-                    int numEnd = macro.indexOf(" ", 6);
-                    if (numEnd < 0)
-                        numEnd = macro.length();
-
-                    int line = Integer.parseInt(macro.substring(6, numEnd));
-
-                    String name = null;
-                    if (numEnd != macro.length())
-                        name = macro.substring(numEnd + 1, macro.length());
-
-                    setLine(line);
-                    fileName = name;
-                    /*System.err.println("file " + name + " line " + line);*/
+                    parseMacroLine(macro);
                     break;
-
-                /*case RCURV:*/
-                    /*pendingTokens.add(token);*/
-                    /*addToken(SEMI, ";");*/
-                    /*break;*/
 
                 case EOF:
                     dedentAll();
@@ -179,13 +203,16 @@ import byond2Common;
 ////////////////////////////////////////////////////////////////////////////////
 // macro
 
-MACRO_LINE : NL? '#line ' INT (' ' STRING)? NL;
+MACRO_LINE
+    :   '# ' INT (' ' STRING)? ' '
+    ;
 
 ////////////////////////////////////////////////////////////////////////////////
 // white
-//
+
 EMPTY_LINE
-    :   { getCharPositionInLine() == 0 }? WS? NL -> skip
+    :   { getCharPositionInLine() == 0 }?
+        WS? (MACRO_LINE WS?)* NL
     ;
 
 fragment NL
@@ -197,7 +224,9 @@ LEADING_WS
         [ \t]+
         {
             if (nesting == 0)        // Not inside ( ) [ ]
+            {
                 emitIndent();
+            }
             skip();
         }
     ;
@@ -210,17 +239,19 @@ IGNORE_NEWLINE
     :   NL
         {
             if (nesting > 0)
+            {
                 skip();
+            }
         }
     ;
 
-LPAREN    : '(' { nesting++; } ;
+LPAREN    : '(' ;
 
-RPAREN    : ')' { nesting--; } ;
+RPAREN    : ')' ;
 
-LBRACK    : '[' { nesting++; } ;
+LBRACK    : '[' ;
 
-RBRACK    : ']' { nesting--; } ;
+RBRACK    : ']' ;
 
 LCURV     : '{' ;
 
