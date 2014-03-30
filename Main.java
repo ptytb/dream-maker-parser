@@ -10,6 +10,14 @@ class Main
         long inputLength = 1;
 
         boolean optionPreprocessOnly = false;
+        boolean optionDoNotPreprocess = false;
+        boolean optionShowTree = false;
+
+        if (optionPreprocessOnly
+                && optionDoNotPreprocess)
+        {
+            throw new RuntimeException("Exclusive options");
+        }
 
         if (args.length > 0)
         {
@@ -22,35 +30,48 @@ class Main
             is = System.in;
         }
 
-        Preprocessor preproc = new Preprocessor(is);
-        preproc.addSearchPath("/media/usb3/Baystation12/Baystation12");
-        PipedReader pipe = new PipedReader(preproc.pipe);
-        Thread t = new Thread(preproc, "Preprocessor");
-        t.start();
+        PipedReader pipe = null;
+        if (!optionDoNotPreprocess)
+        {
+            Preprocessor preproc = new Preprocessor(is);
+            preproc.addSearchPath("/media/usb3/Baystation12/Baystation12");
+            pipe = new PipedReader(preproc.pipe);
+            Thread t = new Thread(preproc, "Preprocessor");
+            t.start();
+        }
 
         if (!optionPreprocessOnly)
         {
-            //byond2Lexer lexer = new byond2Lexer(new UnbufferedCharStream(pipe));
-            //lexer.setTokenFactory(new CommonTokenFactory(true));
-            //UnbufferedTokenStream tokens = new UnbufferedTokenStream(lexer);
-            byond2Lexer lexer = new byond2Lexer(new ANTLRInputStream(pipe));
+            CharStream cs = null;
+            if (optionDoNotPreprocess)
+            {
+                cs = new ANTLRInputStream(is);
+            }
+            else
+            {
+                cs = new ANTLRInputStream(pipe);
+            }
+
+            byond2Lexer lexer = new byond2Lexer(cs);
             lexer.removeErrorListeners();
             lexer.addErrorListener(new byond2ErrorListener(
                         () -> lexer.getSourceName()));
 
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            TokenStream tokens = new CommonTokenStream(lexer);
+
             byond2Parser parser = new byond2Parser(tokens);
             parser.setErrorHandler(new byond2ReportError());
-
             //parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-
-            parser.setBuildParseTree(false);
-
-            //parser.removeParseListeners();
+            parser.setBuildParseTree(optionShowTree);
+            parser.removeParseListeners();
             //parser.addParseListener(new MyParserListener(inputLength));
 
             RuleContext tree = parser.file();
-            //tree.inspect(parser); // show in gui
+
+            if (optionShowTree)
+            {
+                tree.inspect(parser); // show in gui
+            }
             //tree.save(parser, "/tmp/R.ps"); // Generate postscript
             //System.out.println(tree.toStringTree(parser));
         }

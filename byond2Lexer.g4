@@ -373,14 +373,9 @@ fragment EXP :  ('E' | 'e') ('+' | '-')? INT ;
 
 fragment LETTER : [a-zA-Z] | '_' | CODE_ESC;
 
-ID : LETTER (LETTER | DIGIT)* ;
+fragment CODE_ESC : '\\' .;
 
-fragment CODE_ESC
-    :   '\\' . 
-        { 
-            setText("" + getText().charAt(1));
-        }
-    ;
+ID : LETTER (LETTER | DIGIT)* ;
 
 POINT : '.' ;
 
