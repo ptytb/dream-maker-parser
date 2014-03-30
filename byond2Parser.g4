@@ -157,7 +157,7 @@ formalParameter
     ;
 
 procCall
-    :   callable LPAREN actualParameters? RPAREN
+    :   LPAREN actualParameters? RPAREN
     (   (IN expr)? (AS type (BITOR type)*)?
     |   (AS type (BITOR type)*)? (IN expr)? )
     ;
@@ -182,8 +182,8 @@ loopFor
 callable
     :   varSuper
     |   varSelf
-    |   name
     |   opDeref
+    |   name
     ;
 
 loopWhile
@@ -216,8 +216,7 @@ ifConst
 ifCond
     :   IF LPAREN expr RPAREN
     (   newline? blockProc | statementProc)?
-        newline?
-    (   ELSE (newline? blockProc | statementProc)? )?
+    (   newline? ELSE (newline? blockProc | statementProc)? )?
     ;
 
 statRet
@@ -270,7 +269,7 @@ statInternal
 
 opNew
     :   NEW 
-        (path | opDeref)?
+        (opDeref | path)?
         (LPAREN actualParameters? RPAREN)?
     ;
 
@@ -317,15 +316,13 @@ statementProc
     |   statCont
     |   statGoto
     |   statSpawn
-    |   procCall
     |   opAssign
     |   opOpAssign
     |   opNew
-    |   expr BITSHR expr
-    |   expr BITSHL expr
-    |   (INC | DEC) expr
-    |   expr (INC | DEC)        
-    |   expr QMARK expr COLON expr
+    |   callable (procCall | procCall? (BITSHL | BITSHR) expr)
+    |   (INC | DEC) (name listDef* | opDeref)
+    |   (name listDef* | opDeref) (INC | DEC)        
+    |   expr QMARK expr WS? COLON WS? expr
     ;
 
 expr
@@ -347,16 +344,13 @@ expr
     |   expr (BITOR) expr
     |   expr (AND) expr
     |   expr (OR) expr
-    |   expr QMARK expr COLON expr
+    |   expr QMARK expr WS? COLON WS? expr
     |   opNew
     |   statInternal
     |   expr IN expr (TO expr)?
-    |   procCall
-    |   opDeref
+    |   callable procCall?
     |   pathExpr
     |   constant
-    |   name
-    |   varInternal 
     ; 
 
 exprList
@@ -371,17 +365,11 @@ actualParameter
     :   (expr | path) (EQ expr)?
     ;
 
-varInternal
-    :   varSelf
-    |   varSuper
-    |   NULL
-    ;
-
 varSelf
-    :   POINT 
+    :   WS? POINT WS?
     ;
 
 varSuper
-    :   POINT POINT
+    :   WS? POINT POINT WS?
     ;
 

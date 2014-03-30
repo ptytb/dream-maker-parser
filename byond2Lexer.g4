@@ -130,6 +130,13 @@ import byond2Common;
         macroStartCharPositionInLine = _tokenStartCharPositionInLine;
     }
 
+    private boolean isPathSymbol(int type)
+    {
+        return type == SLASH
+            || type == COLON
+            || type == POINT;
+    }
+
     @Override
     public Token nextToken()
     {
@@ -172,8 +179,8 @@ import byond2Common;
             switch (type)
             {
                 case WS:
-                    if (prevTokenType == SLASH
-                        || ahead().getType() == SLASH)
+                    if (isPathSymbol(prevTokenType)
+                        || isPathSymbol(ahead().getType()))
                     {
                         pendingTokens.add(token);
                     }

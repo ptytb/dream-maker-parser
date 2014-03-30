@@ -61,7 +61,7 @@ class Main
 
             byond2Parser parser = new byond2Parser(tokens);
             parser.setErrorHandler(new byond2ReportError());
-            //parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+            parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
             parser.setBuildParseTree(optionShowTree);
             parser.removeParseListeners();
             //parser.addParseListener(new MyParserListener(inputLength));
