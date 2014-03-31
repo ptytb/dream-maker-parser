@@ -1,6 +1,6 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-import java.util.*;
+import java.util.ArrayList;
 
 class byond2MacroEval
 {
@@ -13,7 +13,7 @@ class byond2MacroEval
 	errorListener = el;
     }
     
-    public String eval(Vector<Token> macro)
+    public String eval(ArrayList<Token> macro)
     {
         ListTokenSource macroStream = new ListTokenSource(macro);
         CommonTokenStream macroTokens = new CommonTokenStream(macroStream);

@@ -1,6 +1,7 @@
 import org.antlr.v4.runtime.*;
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Stack;
 
 class FileState
 {
@@ -66,9 +67,9 @@ class Preprocessor implements Runnable
     private Stack<FileState> files = new Stack<FileState>();
 
     // Current macro
-    private Vector<Token> macro = new Vector<Token>();
+    private ArrayList<Token> macro = new ArrayList<Token>();
     
-    private Vector<String> paths = new Vector<String>();
+    private ArrayList<String> paths = new ArrayList<String>();
 
     private byond2ErrorListener errorListener = new byond2ErrorListener(
             () -> file.name );
@@ -90,25 +91,32 @@ class Preprocessor implements Runnable
         catch (IOException e) { }
     }
 
-    public void addSearchPath(String path)
+    public void setSearchPathList(ArrayList<String> list)
     {
-        paths.add(path);
+        paths = list;
     }
 
-    private String ext(String name)
+    private static String ext(String name)
     {
         return name.substring(name.lastIndexOf('.') + 1);
     }
 
-    private String search(String name)
+    public static String search(String name, ArrayList<String> paths)
     {
         for (String p : paths)
         {
             File f = new File(p, name);
-            if (ext(name).equals("dm") && f.exists())
+            if (f.exists())
+            {
                 return f.getPath();
+            }
         }
         return name;
+    }
+
+    private String search(String name)
+    {
+        return search(name, paths);
     }
 
     private void include(String name)
@@ -131,7 +139,10 @@ class Preprocessor implements Runnable
         String name = e.eval(macro);
         if (name != null)
         {
-            include(name);
+            if (ext(name).equals("dm"))
+            {
+                include(name);
+            }
         }
     }
 

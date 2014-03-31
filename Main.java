@@ -1,6 +1,12 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.*;
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.PipedReader;
+import java.io.PipedWriter;
+import java.io.BufferedReader;
+import java.util.ArrayList;
 
 class Main
 {
@@ -13,6 +19,28 @@ class Main
         boolean optionDoNotPreprocess = false;
         boolean optionShowTree = false;
 
+        ArrayList<String> searchPathList = new ArrayList<String>();
+
+        for (String opt : args)
+        {
+            if (opt.equals("-p"))
+            {
+                optionPreprocessOnly = true;
+            }
+            else if (opt.equals("-d"))
+            {
+                optionDoNotPreprocess = true;
+            }
+            else if (opt.equals("-t"))
+            {
+                optionShowTree = true;
+            }
+            else if (opt.startsWith("-I"))
+            {
+                searchPathList.add(opt.substring(2).trim());
+            }
+        }
+
         if (optionPreprocessOnly
                 && optionDoNotPreprocess)
         {
@@ -21,7 +49,8 @@ class Main
 
         if (args.length > 0)
         {
-            FileInputStream fis = new FileInputStream(args[0]);
+            FileInputStream fis = new FileInputStream(
+                    Preprocessor.search(args[args.length - 1], searchPathList));
             inputLength = fis.getChannel().size();
             is = fis;
         }
@@ -34,7 +63,7 @@ class Main
         if (!optionDoNotPreprocess)
         {
             Preprocessor preproc = new Preprocessor(is);
-            preproc.addSearchPath("/media/usb3/Baystation12/Baystation12");
+            preproc.setSearchPathList(searchPathList);
             pipe = new PipedReader(preproc.pipe);
             Thread t = new Thread(preproc, "Preprocessor");
             t.start();

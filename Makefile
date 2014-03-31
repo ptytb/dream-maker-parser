@@ -26,10 +26,10 @@ CLS = $(SRCF:.java=.class)
 all: $(classes) $(CLS)
 
 %.class: %.java
-	javac -cp .:/media/usb3/media/download/antlr-4.2-complete.jar $<
+	javac -cp .:/media/usb3/media/download/antlr-4.2.1-complete.jar $<
 
 %.java: %.g4
-	java -jar /media/usb3/media/download/antlr-4.2-complete.jar $?
+	java -jar /media/usb3/media/download/antlr-4.2.1-complete.jar $?
 
 clean:
 	-rm byond2Parser.java
