@@ -11,7 +11,7 @@ class Main
 
         boolean optionPreprocessOnly = false;
         boolean optionDoNotPreprocess = false;
-        boolean optionShowTree = true;
+        boolean optionShowTree = false;
 
         if (optionPreprocessOnly
                 && optionDoNotPreprocess)

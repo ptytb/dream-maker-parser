@@ -321,10 +321,7 @@ statementProc
     |   opAssign
     |   opOpAssign
     |   opNew
-    |   callable (procCall | (procCall | listDef+)? (BITSHL | BITSHR) expr)
-    |   (INC | DEC) (name | opDeref | varSelf) listDef*
-    |   (name | opDeref | varSelf) listDef* (INC | DEC)        
-    |   expr QMARK expr WS? COLON WS? expr
+    |   expr
     ;
 
 expr
