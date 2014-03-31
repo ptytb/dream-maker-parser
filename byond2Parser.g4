@@ -37,9 +37,16 @@ statementLine
     :   statement (SEMI statement?)*
     ;
 
+blockBracedEnd
+    :   
+    (   RCURV (newline? DEDENT)? (newline? DEDENT)*?
+    |   (DEDENT newline)* RCURV)
+    ;
+
 blockBraced
-    :   LCURV statementLine? (newline (INDENT (blockInner newline?)?)?)?
-        (RCURV (newline? DEDENT)* | (DEDENT newline)* RCURV)
+    :   LCURV statementLine?
+    (   RCURV
+    |   (newline (INDENT (blockInner newline?)?)?)? blockBracedEnd)
     ;
 
 blockIndented
@@ -78,8 +85,9 @@ statementProcLine
     ;
 
 blockBracedProc
-    :   LCURV statementProcLine? (newline (INDENT (blockInnerProc newline?)?)?)?
-        (RCURV (newline? DEDENT)* | (DEDENT newline)* RCURV)
+    :   LCURV statementProcLine?
+    (   RCURV
+    |   (newline (INDENT (blockInnerProc newline?)?)?)? blockBracedEnd)
     ;
 
 blockIndentedProc
@@ -319,9 +327,9 @@ statementProc
     |   opAssign
     |   opOpAssign
     |   opNew
-    |   callable (procCall | procCall? (BITSHL | BITSHR) expr)
-    |   (INC | DEC) (name listDef* | opDeref)
-    |   (name listDef* | opDeref) (INC | DEC)        
+    |   callable (procCall | (procCall | listDef+)? (BITSHL | BITSHR) expr)
+    |   (INC | DEC) (name | opDeref | varSelf) listDef*
+    |   (name | opDeref | varSelf) listDef* (INC | DEC)        
     |   expr QMARK expr WS? COLON WS? expr
     ;
 
