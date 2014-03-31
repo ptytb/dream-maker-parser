@@ -37,16 +37,10 @@ statementLine
     :   statement (SEMI statement?)*
     ;
 
-blockBracedEnd
-    :   
-    (   RCURV (newline? DEDENT)? (newline? DEDENT)*?
-    |   (DEDENT newline)* RCURV)
-    ;
-
 blockBraced
     :   LCURV statementLine?
     (   RCURV
-    |   (newline (INDENT (blockInner newline?)?)?)? blockBracedEnd)
+    |   (newline (INDENT (blockInner newline?)? DEDENT newline)?)? RCURV)
     ;
 
 blockIndented
@@ -87,7 +81,7 @@ statementProcLine
 blockBracedProc
     :   LCURV statementProcLine?
     (   RCURV
-    |   (newline (INDENT (blockInnerProc newline?)?)?)? blockBracedEnd)
+    |   (newline (INDENT (blockInnerProc newline?)? DEDENT newline)?)? RCURV)
     ;
 
 blockIndentedProc

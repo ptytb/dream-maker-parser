@@ -3,6 +3,10 @@ import byond2Common;
 
 ////////////////////////////////////////////////////////////////////////////////
 // token flow control
+@lexer::header
+{
+    import java.util.Stack;
+}
 
 @lexer::members
 {
@@ -12,6 +16,10 @@ import byond2Common;
     private int prevTokenType = EOF;
     private String fileName = null;
     private int macroStartCharPositionInLine;
+    private int nestingBraces = 0;
+    private int indentLevelBraced = 0;
+    private Stack<Integer> indentLevelBracedStack = 
+        new Stack<Integer>();
 
     @Override
     public String getSourceName()
@@ -31,6 +39,11 @@ import byond2Common;
 
     private void indent(int n)
     {
+        if (nestingBraces > 0)
+        {
+            indentLevelBraced += n;
+        }
+
         indentLevel += n;
         while (n > 0)
         {
@@ -41,6 +54,11 @@ import byond2Common;
     
     private void dedent(int n)
     {
+        if (nestingBraces > 0)
+        {
+            indentLevelBraced -= n;
+        }
+
         indentLevel -= n;
         while (n > 0)
         {
@@ -190,6 +208,32 @@ import byond2Common;
                 case MACRO_LINE:
                     String macro = getText().trim();
                     parseMacroLine(macro);
+                    break;
+
+                case LCURV:
+                    nestingBraces++;
+
+                    indentLevelBracedStack.push(indentLevelBraced);
+                    indentLevelBraced = 0;
+
+                    pendingTokens.add(token);
+                    break;
+
+                case RCURV: 
+                    if (indentLevelBraced > 0)
+                    {
+                        dedent(indentLevelBraced);
+                        indentLevelBraced = 0;
+                    }
+
+                    nestingBraces--;
+
+                    if (!indentLevelBracedStack.isEmpty())
+                    {
+                        indentLevelBraced = indentLevelBracedStack.pop();
+                    }
+
+                    pendingTokens.add(token);
                     break;
 
                 case EOF:
