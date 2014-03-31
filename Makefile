@@ -1,35 +1,39 @@
 #!/bin/sh
 
 IGNORE = \
-	 byond2Parser.java\
-	 byond2Lexer.java\
-	 byond2ParserBaseListener.java\
-	 byond2ParserListener.java\
-	 byond2Preproc.java\
-	 byond2PreprocLexer.java\
-	 byond2PreprocBaseListener.java\
-	 byond2PreprocListener.java
+	 Parser.java\
+	 Lexer.java\
+	 ParserBaseListener.java\
+	 ParserListener.java\
+	 Preproc.java\
+	 PreprocLexer.java\
+	 PreprocBaseListener.java\
+	 PreprocListener.java
 
 grammars = \
-	   byond2Lexer.g4\
-	   byond2Parser.g4\
-	   byond2PreprocLexer.g4\
-	   byond2Preproc.g4
+	   DMLexer.g4\
+	   DMParser.g4\
+	   PreprocLexer.g4\
+	   Preproc.g4
 
-sources = $(grammars:.g4=.java)
-classes = $(grammars:.g4=.class)
+classes_g4 = $(grammars:.g4=.class)
 
-SRCS = $(wildcard *.java)
-SRCF = $(filter-out $(IGNORE), $(SRCS))
-CLS = $(SRCF:.java=.class)
+sources = $(wildcard src/*.java)
+classes = $(sources:.java=.class)
 
-all: $(classes) $(CLS)
+all: $(classes_g4) $(classes)
 
-%.class: %.java
-	javac -cp .:/media/usb3/media/download/antlr-4.2.1-complete.jar $<
+%.class: src-g4/grammar/%.java 
+	javac -cp src:src-g4/grammar:/media/usb3/media/download/antlr-4.2.1-complete.jar \
+	    -d class $<
 
-%.java: %.g4
-	java -jar /media/usb3/media/download/antlr-4.2.1-complete.jar $?
+src/%.class: src/%.java
+	javac -cp src:src-g4/grammar:/media/usb3/media/download/antlr-4.2.1-complete.jar \
+	    -d class $<
+
+src-g4/grammar/%.java: grammar/%.g4
+	java -jar /media/usb3/media/download/antlr-4.2.1-complete.jar \
+	    -o src-g4 -lib src-g4/grammar $?
 
 clean:
 	-rm byond2Parser.java
@@ -44,8 +48,13 @@ clean:
 	-rm byond2PreprocBaseVisitor.java
 	-rm byond2ParserBaseVisitor.java
 	-rm byond2ParserVisitor.java
-	-rm *.class
-	-rm *.tokens
+	-rm byond2Common.java
+	-rm class/*.class
+	-rm -rf src-g4/grammar/*
+	-rm byondp.jar
+
+jar:
+	@jar cf byondp.jar class/*.class
 
 test:
 	@./test.sh

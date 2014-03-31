@@ -1,7 +1,7 @@
 import org.antlr.v4.runtime.*;
 import java.util.Calendar;
 
-class MyParserListener extends byond2ParserBaseListener
+class MyParserListener extends DMParserBaseListener
 {
     private long inputLength;
     private long offset_prev = 0;

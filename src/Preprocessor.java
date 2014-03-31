@@ -8,7 +8,7 @@ class FileState
     File file;
     InputStream fs;
     long offset;
-    byond2PreprocLexer lexer;
+    PreprocLexer lexer;
     String name;
     static BaseErrorListener errorListener;
 
@@ -29,9 +29,9 @@ class FileState
     }
 
     // Each lexer store state for every included file
-    private byond2PreprocLexer lexerFactory()
+    private PreprocLexer lexerFactory()
     {
-        byond2PreprocLexer lexer = new byond2PreprocLexer(
+        PreprocLexer lexer = new PreprocLexer(
                 new UnbufferedCharStream(fs));
         lexer.setTokenFactory(new CommonTokenFactory(true));
         lexer.removeErrorListeners();
@@ -71,7 +71,7 @@ class Preprocessor implements Runnable
     
     private ArrayList<String> paths = new ArrayList<String>();
 
-    private byond2ErrorListener errorListener = new byond2ErrorListener(
+    private ErrorListener errorListener = new ErrorListener(
             () -> file.name );
 
     Preprocessor(InputStream is) throws IOException
@@ -135,7 +135,7 @@ class Preprocessor implements Runnable
 
     private void evalMacro()
     {
-        byond2MacroEval e = new byond2MacroEval(errorListener);
+        MacroEval e = new MacroEval(errorListener);
         String name = e.eval(macro);
         if (name != null)
         {
@@ -159,7 +159,7 @@ class Preprocessor implements Runnable
 
         switch (type)
         {
-            //case byond2PreprocLexer.ID:
+            //case PreprocLexer.ID:
             //token = new CommonToken(token.getType(),
             //"[:ID[" + token.getText() + "]:]");
 

@@ -1,8 +1,8 @@
-parser grammar byond2Preproc;
+parser grammar Preproc;
 
 options
 {
-    tokenVocab = byond2PreprocLexer;
+    tokenVocab = PreprocLexer;
 }
 
 macro

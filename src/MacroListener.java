@@ -10,12 +10,12 @@ class IncludeRel
     String name;
 }
 
-class byond2MacroListener extends byond2PreprocBaseListener
+class MacroListener extends PreprocBaseListener
 {
     Object result;
 
     @Override
-    public void enterMacroIncludeRel(byond2Preproc.MacroIncludeRelContext ctx)
+    public void enterMacroIncludeRel(Preproc.MacroIncludeRelContext ctx)
     {
         String text = ctx.getText().substring(7);
         text = text.replace("\\", "/");

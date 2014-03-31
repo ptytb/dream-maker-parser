@@ -1,4 +1,4 @@
-lexer grammar byond2WhiteSpace;
+lexer grammar WhiteSpace;
 
 @lexer::members
 {

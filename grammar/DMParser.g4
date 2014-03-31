@@ -1,8 +1,8 @@
-parser grammar byond2Parser;
+parser grammar DMParser;
 
 options
 {
-    tokenVocab = byond2Lexer;
+    tokenVocab = DMLexer;
 }
 
 
@@ -276,21 +276,21 @@ opNew
     ;
 
 opAssign
-    :   expr EQ <assoc=right> expr
+    :   expr EQ expr
     ;
 
 opOpAssign
     :   expr
-    (   EQPLUS <assoc=right>
-    |   EQMINUS <assoc=right>
-    |   EQMUL <assoc=right>
-    |   EQSLASH <assoc=right>
-    |   EQMOD <assoc=right>
-    |   EQBITOR <assoc=right>
-    |   EQBITAND <assoc=right>
-    |   EQBITRSH <assoc=right>
-    |   EQBITLSH <assoc=right>
-    |   EQBITXOR <assoc=right>)
+    (   EQPLUS 
+    |   EQMINUS 
+    |   EQMUL 
+    |   EQSLASH 
+    |   EQMOD 
+    |   EQBITOR 
+    |   EQBITAND 
+    |   EQBITRSH 
+    |   EQBITLSH 
+    |   EQBITXOR )
         expr
     ;
 
@@ -298,7 +298,7 @@ statement
     :   path
     (   procDef
     |   newline? block
-    |   listDef? EQ <assoc=right> expr)?
+    |   listDef* EQ expr)?
     |   statVar
     ;
 
@@ -332,7 +332,7 @@ expr
     |   BITNOT expr
     |   (INC | DEC) expr
     |   expr (INC | DEC)
-    |   expr POW <assoc=right> expr
+    |   expr POW expr
     |   expr (WS? SLASH WS? | MUL | MOD) expr
     |   expr (PLUS | MINUS) expr
     |   expr (LT | LTEQ | GT | GTEQ ) expr

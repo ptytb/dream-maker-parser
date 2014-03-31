@@ -1,5 +1,5 @@
-lexer grammar byond2PreprocLexer;
-import byond2WhiteSpace, byond2Common;
+lexer grammar PreprocLexer;
+import WhiteSpace, Common;
 
 ////////////////////////////////////////////////////////////////////////////////
 // plain mode

@@ -1,5 +1,5 @@
-lexer grammar byond2Lexer;
-import byond2Common;
+lexer grammar DMLexer;
+import Common;
 
 ////////////////////////////////////////////////////////////////////////////////
 // token flow control

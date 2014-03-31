@@ -1,6 +1,6 @@
 import org.antlr.v4.runtime.*;
 
-class byond2ErrorListener extends BaseErrorListener
+class ErrorListener extends BaseErrorListener
 {
     interface GetSourceName
     {
@@ -9,7 +9,7 @@ class byond2ErrorListener extends BaseErrorListener
 
     private GetSourceName getSourceName;
 
-    byond2ErrorListener(GetSourceName sn)
+    ErrorListener(GetSourceName sn)
     {
         this.getSourceName = sn;
     }

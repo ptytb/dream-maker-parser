@@ -1,6 +1,6 @@
 import org.antlr.v4.runtime.*;
 
-class byond2ReportError extends DefaultErrorStrategy
+class ReportError extends DefaultErrorStrategy
 {
     public void reportError(Parser recognizer,
             RecognitionException e)

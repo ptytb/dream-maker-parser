@@ -81,15 +81,15 @@ class Main
                 cs = new ANTLRInputStream(pipe);
             }
 
-            byond2Lexer lexer = new byond2Lexer(cs);
+            DMLexer lexer = new DMLexer(cs);
             lexer.removeErrorListeners();
-            lexer.addErrorListener(new byond2ErrorListener(
+            lexer.addErrorListener(new ErrorListener(
                         () -> lexer.getSourceName()));
 
             TokenStream tokens = new CommonTokenStream(lexer);
 
-            byond2Parser parser = new byond2Parser(tokens);
-            parser.setErrorHandler(new byond2ReportError());
+            DMParser parser = new DMParser(tokens);
+            parser.setErrorHandler(new ReportError());
             parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
             parser.setBuildParseTree(optionShowTree);
             parser.removeParseListeners();
