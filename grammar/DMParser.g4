@@ -14,7 +14,7 @@ newline
     ;
 
 label
-    :   ID COLON? newline? blockProc?
+    :   ID COLON? (newline? blockProc)?
     ;
 
 constant
