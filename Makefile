@@ -1,4 +1,4 @@
-#!/bin/sh
+.SECONDARY:
 
 IGNORE = \
 	 Parser.java\
@@ -35,6 +35,8 @@ src-g4/grammar/%.java: grammar/%.g4
 	java -jar /media/usb3/media/download/antlr-4.2.1-complete.jar \
 	    -o src-g4 -lib src-g4/grammar $?
 
+.PHONY: test testf clean
+
 clean:
 	-rm byond2Parser.java
 	-rm byond2Lexer.java
@@ -53,7 +55,9 @@ clean:
 	-rm -rf src-g4/grammar/*
 	-rm byondp.jar
 
-jar:
+jar: byondp.jar
+
+byondp.jar:
 	@jar cf byondp.jar class/*.class
 
 test:
@@ -65,6 +69,4 @@ testf:
 test_output:
 	@./testf.sh output.dm
 
-.PHONY: test testf all
-.SECONDARY:
 
