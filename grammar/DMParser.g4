@@ -298,7 +298,7 @@ statement
     :   path
     (   procDef
     |   newline? block
-    |   listDef* EQ expr)?
+    |   listDef? EQ expr)?
     |   statVar
     ;
 

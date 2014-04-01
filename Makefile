@@ -64,9 +64,15 @@ test:
 	@./test.sh
 
 testf:
-	@./testf.sh
+	@./testf.sh -I"/media/usb3/Baystation12/Baystation12" "baystation12.dme"
 
-test_output:
-	@./testf.sh output.dm
+amalgamation: amalgam.dm
+
+amalgam.dm:
+	@./testf.sh -p -I"/media/usb3/Baystation12/Baystation12" \
+	    "baystation12.dme" > amalgam.dm
+
+test_amalgam:
+	@./testf.sh -d amalgam.dm
 
 
