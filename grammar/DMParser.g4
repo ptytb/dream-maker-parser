@@ -352,10 +352,6 @@ expr
     |   constant
     ; 
 
-exprList
-    :   expr (COMMA expr)*
-    ; 
-
 actualParameters
     :   (actualParameter | COMMA actualParameter?) (COMMA actualParameter?)*
     ; 
