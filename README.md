@@ -24,11 +24,15 @@ Run *java -Xmx2G -cp .:antlr-4.2.1-complete.jar Main -I"path/to/code"
 
 ###Development status
 Currently parses everything from [Baystation
-12](https://github.com/Baystation12/Baystation12). Some dm files with quirks and
- stray charachters must be fixed.
+12](https://github.com/Baystation12/Baystation12). Some *dm* files with quirks
+and stray charachters must be fixed.
 
-Parsing code tree as single *world.dme* file with includes, consumes a lot of
-memory and slows down, despite SLL grammar. Need some rework here.
+Despite SLL grammar, parsing code tree as a single amalgamation or *world.dme*
+file with includes, consumes a lot of memory or slows down cause of garbage
+collection. But it seem to be very fast if you have enough RAM. Maybe some
+rework should be done here. (ANTLR4
+techreport)[http://antlr.org/papers/allstar-techreport.pdf] describes what are
+DFA and ATN structures who consumes all your RAM.
 
 Preprocessor currently implements directives:
 * #include.
