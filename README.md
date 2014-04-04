@@ -16,10 +16,15 @@ make
 ```
 
 ###Running
-Run
+Parse file:
 ```bash
-java -Xmx2G -cp .:antlr-4.2.1-complete.jar Main [-t -d -p]-I"path/to/code" 
+java -Xmx2G -cp .:antlr-4.2.1-complete.jar Main [-t -d -p] -I"path/to/code" 
 "main.dme"
+```
+Preprocess all and catenate to a single file:
+```bash
+java -Xmx2G -cp .:antlr-4.2.1-complete.jar Main -I"path/to/code" -p 
+-I"path/to/code" "world.dme" > amalgamation.dm
 ```
 
 ####Options

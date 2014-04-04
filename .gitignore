@@ -2,7 +2,10 @@ class/*.class
 src-g4/grammar/*
 *.txt
 *.swp
+grammar/*.swp
+src/*.swp
 *.bkp
 *.png
 *.html
 *.dm
+*.sh

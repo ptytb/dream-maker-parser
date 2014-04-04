@@ -1,5 +1,7 @@
 .SECONDARY:
 
+ANTLR4_PATH = ../
+
 IGNORE = \
 	 Parser.java\
 	 Lexer.java\
@@ -24,18 +26,18 @@ classes = $(sources:.java=.class)
 all: $(classes_g4) $(classes)
 
 %.class: src-g4/grammar/%.java 
-	javac -cp src:src-g4/grammar:/media/usb3/media/download/antlr-4.2.1-complete.jar \
+	javac -cp src:src-g4/grammar:$(ANTLR4_PATH)/antlr-4.2.1-complete.jar \
 	    -d class $<
 
 src/%.class: src/%.java
-	javac -cp src:src-g4/grammar:/media/usb3/media/download/antlr-4.2.1-complete.jar \
+	javac -cp src:src-g4/grammar:$(ANTLR4_PATH)/antlr-4.2.1-complete.jar \
 	    -d class $<
 
 src-g4/grammar/%.java: grammar/%.g4
-	java -jar /media/usb3/media/download/antlr-4.2.1-complete.jar \
+	java -jar $(ANTLR4_PATH)/antlr-4.2.1-complete.jar \
 	    -o src-g4 -lib src-g4/grammar $?
 
-.PHONY: test testf clean
+.PHONY: clean
 
 clean:
 	-rm byond2Parser.java
@@ -59,20 +61,4 @@ jar: byondp.jar
 
 byondp.jar:
 	@jar cf byondp.jar class/*.class
-
-test:
-	@./test.sh
-
-testf:
-	@./testf.sh -I"/media/usb3/Baystation12/Baystation12" "baystation12.dme"
-
-amalgamation: amalgam.dm
-
-amalgam.dm:
-	@./testf.sh -p -I"/media/usb3/Baystation12/Baystation12" \
-	    "baystation12.dme" > amalgam.dm
-
-test_amalgam:
-	@./testf.sh -d amalgam.dm
-
 
