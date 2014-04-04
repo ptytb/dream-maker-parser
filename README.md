@@ -33,6 +33,13 @@ java -Xmx2G -cp .:antlr-4.2.1-complete.jar Main -I"path/to/code" -p
 * **-p** preprocess only;
 * **-Ipath** include search path.
 
+###Handle parser's events
+Extend *DMParserBaseListener* class or implement *DMParserListener* interface.
+Then add listener to *Main.java*:
+```java
+parser.addParseListener(new MyParserListener());
+```
+
 ###Development status
 Currently parses everything from [Baystation
 12](https://github.com/Baystation12/Baystation12). Some *dm* files with quirks
