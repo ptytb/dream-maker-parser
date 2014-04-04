@@ -10,11 +10,17 @@ and Java.
 - JDK 8.
 
 ###Building
-Run *make*
+Run
+```bash
+make
+```
 
 ###Running
-Run *java -Xmx2G -cp .:antlr-4.2.1-complete.jar Main -I"path/to/code"
-"main.dme"* 
+Run
+```bash
+java -Xmx2G -cp .:antlr-4.2.1-complete.jar Main [-t -d -p]-I"path/to/code" 
+"main.dme"
+```
 
 ####Options
 * **-t** show GUI parse tree;
