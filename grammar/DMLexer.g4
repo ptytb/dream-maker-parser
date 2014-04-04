@@ -84,7 +84,12 @@ import Common;
         }
         else
         {
-            if (indent % indentUnit != 0)
+            if (indentUnit == 0)
+            {
+                // indented after LCURV found, didn't know indent
+                indentUnit = indent;
+            }
+            else if (indent % indentUnit != 0)
             {
                 throw new RuntimeException("Invalid indent, line " + getLine());
             }
@@ -211,21 +216,17 @@ import Common;
                     break;
 
                 case LCURV:
-                    nestingBraces++;
-
                     indentLevelBracedStack.push(indentLevelBraced);
                     indentLevelBraced = 0;
 
+                    nestingBraces++;
                     pendingTokens.add(token);
+                    indent(1);
                     break;
 
                 case RCURV: 
-                    if (indentLevelBraced > 0)
-                    {
-                        dedent(indentLevelBraced);
-                        indentLevelBraced = 0;
-                    }
-
+                    dedent(indentLevelBraced);
+                    indentLevelBraced = 0;
                     nestingBraces--;
 
                     if (!indentLevelBracedStack.isEmpty())

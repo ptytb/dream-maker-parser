@@ -33,14 +33,8 @@ blockInner
     :   statement ((SEMI | newline) statement?)*
     ;
 
-statementLine
-    :   statement (SEMI statement?)*
-    ;
-
 blockBraced
-    :   LCURV statementLine?
-    (   RCURV
-    |   (newline (INDENT (blockInner newline?)? DEDENT newline)?)? RCURV)
+    :   LCURV INDENT newline? blockInner? DEDENT newline RCURV
     ;
 
 blockIndented
@@ -58,7 +52,7 @@ blockInnerSwitch
     ;
 
 blockBracedSwitch
-    :   LCURV blockInnerSwitch? RCURV
+    :   LCURV INDENT newline? blockInnerSwitch? DEDENT newline RCURV
     ;
 
 blockIndentedSwitch
@@ -79,9 +73,7 @@ statementProcLine
     ;
 
 blockBracedProc
-    :   LCURV statementProcLine?
-    (   RCURV
-    |   (newline (INDENT (blockInnerProc newline?)? DEDENT newline)?)? RCURV)
+    :   LCURV INDENT newline? blockInnerProc? DEDENT newline RCURV
     ;
 
 blockIndentedProc
@@ -171,7 +163,7 @@ loopFor
             (STEP expr)?
         |   (statementProc | blockBracedProc)?
             (SEMI | COMMA)
-            (expr | LCURV SEMI* expr? SEMI* RCURV)?
+            expr?
             (
             (SEMI | COMMA)
             (statementProc | blockBracedProc)?
