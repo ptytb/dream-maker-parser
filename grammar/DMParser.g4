@@ -312,7 +312,6 @@ statementProc
     |   statSpawn
     |   opAssign
     |   opOpAssign
-    |   opNew
     |   expr
     ;
 
