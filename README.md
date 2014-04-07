@@ -47,10 +47,10 @@ and stray charachters must be fixed.
 
 Despite SLL grammar, parsing code tree as a single amalgamation or *world.dme*
 file with includes, consumes a lot of memory or slows down cause of garbage
-collection. But it seem to be very fast if you have enough RAM. Maybe some
-rework should be done here. [ANTLR4
-techreport](http://antlr.org/papers/allstar-techreport.pdf) describes what are
-DFA and ATN structures who consumes all your RAM.
+collection. But it's very fast if you have enough RAM: 5 min 11 sec, 580M used
+for Baystation 12. Maybe some rework should be done here. [ANTLR4
+    techreport](http://antlr.org/papers/allstar-techreport.pdf) describes what
+    are DFA and ATN structures who consumes all your RAM.
 
 Preprocessor currently implements directives:
 * #include.
