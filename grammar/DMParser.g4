@@ -29,8 +29,13 @@ file
         EOF
     ;
 
+delimiter
+    :   SEMI
+    |   newline
+    ;
+
 blockInner
-    :   statement ((SEMI | newline) statement?)*
+    :   statement (delimiter statement?)*
     ;
 
 blockBraced
@@ -65,11 +70,7 @@ blockSwitch
     ;
 
 blockInnerProc
-    :   statementProc ((SEMI | newline) statementProc?)*
-    ;
-
-statementProcLine
-    :   statementProc (SEMI statementProc?)*
+    :   statementProc (delimiter statementProc?)*
     ;
 
 blockBracedProc
