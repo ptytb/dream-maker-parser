@@ -42,15 +42,16 @@ parser.addParseListener(new MyParserListener());
 
 ###Development status
 Currently parses everything from [Baystation
-12](https://github.com/Baystation12/Baystation12). Some *dm* files with quirks
-and stray charachters must be fixed.
+12](https://github.com/Baystation12/Baystation12), tested on commit
+*57703df2f9f514e72fb46896d0b49262c0e63005*. Some *dm* files with quirks and
+stray charachters must be fixed.
 
-Despite SLL grammar, parsing code tree as a single amalgamation or *world.dme*
-file with includes, consumes a lot of memory or slows down cause of garbage
-collection. But it's very fast if you have enough RAM: 5 min 11 sec, 580M used
-for Baystation 12. Maybe some rework should be done here. [ANTLR4
-    techreport](http://antlr.org/papers/allstar-techreport.pdf) describes what
-    are DFA and ATN structures who consumes all your RAM.
+Despite this grammar is SLL, parsing code tree as a single amalgamation or
+*world.dme* file with includes, consumes a lot of memory or slows down cause of
+garbage collection. But it's very fast if you have enough RAM: 5 min 11 sec,
+580M used for whole Baystation 12. Maybe some rework should be done here.
+[ANTLR4 techreport](http://antlr.org/papers/allstar-techreport.pdf) describes
+what are DFA and ATN structures who consumes your RAM.
 
 Preprocessor currently implements directives:
 * #include.
@@ -58,3 +59,10 @@ Preprocessor currently implements directives:
 ###TODO
 - implement all remaining preprocessor directives;
 - add parser mode for strings.
+
+###Other implementations and related projects
+- [Flex and bison dream maker
+  grammars](https://github.com/nan0desu/dreamcatcher)
+- [Byond port to C++ with modified dreamcatcher
+  grammars](https://github.com/N3X15/OpenBYOND)
+- [Vim syntax for dream maker sources](https://github.com/wlue/vim-dm-syntax)
